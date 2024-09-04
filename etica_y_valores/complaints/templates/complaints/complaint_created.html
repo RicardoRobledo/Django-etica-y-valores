@@ -1,0 +1,65 @@
+{% load static qr_code %}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complaint created</title>
+    <!-- Enlace a Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/complaint_created.css' %}">
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="row">
+            {% if url %}
+            <!-- Mostrar contenido si 'url' no está vacío -->
+            <!-- Primera tarjeta -->
+            <div class="col-md-6 mb-4">
+                <div class="card rounded-0">
+                    <div class="px-5 py-5">
+                        <img src="{% static 'imgs/complaint.png' %}" class="card-img-top" height="289" alt="complaint-img">
+                    </div>
+                    <div class="card-body card-body-container rounded-0">
+                        <h5 class="card-title text-white">Url</h5>
+                        <p class="card-text text-white">
+                            Usa esta url para ver directamente el estado de tu denuncia.
+                        </p>
+                        <p class="text-center">
+                            <a href="{{ url }}" class="btn btn-primary">Ir a url</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Segunda tarjeta -->
+            <div class="col-md-6 mb-4">
+                <div class="card rounded-0">
+                    <div class="card-img-top text-center bg-primary p-5">
+                        {% qr_from_text qr_url size="L" %}
+                    </div>
+                    <div class="card-body card-body-container rounded-0">
+                        <h5 class="card-title text-white">Código QR</h5>
+                        <p class="card-text text-white">Escanea este código QR para ver el estado de tu denuncia.</p>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <!-- Mostrar mensaje si 'url' está vacío -->
+            <div class="col-12 text-center">
+                <div class="alert alert-danger" role="alert">
+                    Código inexistente. Por favor, asegurese de que el código sea correcto.
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Enlace a Bootstrap JS y sus dependencias -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.js"
+        integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
+    <script src="{% static 'js/complaint_created.js' %}"></script>
+</body>
+</html>

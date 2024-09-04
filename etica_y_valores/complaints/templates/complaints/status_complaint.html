@@ -1,0 +1,127 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bootstrap Kanban Board</title>
+  <!-- Bootstrap CSS -->
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  >
+  <link rel="stylesheet" href="{% static 'css/status_complaint.css' %}">
+</head>
+<body>
+
+  <div class="container my-5">
+    {% if code %}
+    <!-- Mostrar contenido del tablero si 'code' no está vacío -->
+    <h1 class="text-center mb-5">Estatus de denuncia</h1>
+    <div class="row gx-4">
+
+      <!-- To Do Column -->
+      <div class="col-md-3 mb-3">
+        <div class="card column rounded-0">
+          <div class="card-header bg-primary text-white rounded-0">
+            To Do
+          </div>
+          <div class="card-body">
+            <div class="card mb-3 rounded-0">
+              <div class="card-body">
+                Task 1: Design homepage
+              </div>
+            </div>
+            <div class="card mb-3 rounded-0">
+              <div class="card-body">
+                Task 2: Create user flow
+              </div>
+            </div>
+            <div class="card mb-3 rounded-0">
+              <div class="card-body">
+                Task 3: Set up database
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- In Progress Column -->
+      <div class="col-md-3 mb-3">
+        <div class="card column rounded-0">
+          <div class="card-header bg-warning text-white rounded-0">
+            In Progress
+          </div>
+          <div class="card-body">
+            <div class="card mb-3 rounded-0">
+              <div class="card-body">
+                Task 4: Develop login feature
+              </div>
+            </div>
+            <div class="card mb-3 rounded-0">
+              <div class="card-body">
+                Task 5: API integration
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Review Column -->
+      <div class="col-md-3 mb-3">
+        <div class="card column rounded-0">
+          <div class="card-header bg-info text-white rounded-0">
+            Review
+          </div>
+          <div class="card-body">
+            <div class="card mb-3 rounded-0">
+              <div class="card-body">
+                Task 6: Code review for dashboard
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Done Column -->
+      <div class="col-md-3 mb-3">
+        <div class="card column rounded-0">
+          <div class="card-header bg-success text-white rounded-0">
+            Done
+          </div>
+          <div class="card-body">
+            <div class="card mb-3 rounded-0">
+              <div class="card-body">
+                Task 7: Setup project repository
+              </div>
+            </div>
+            <div class="card mb-3 rounded-0">
+              <div class="card-body">
+                Task 8: Initial project planning
+              </div>
+            </div>
+            <div class="card mb-3 rounded-0">
+              <div class="card-body">
+                Task 9: Requirement gathering
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    {% else %}
+    <!-- Mostrar mensaje si 'code' está vacío -->
+    <div class="alert alert-danger text-center" role="alert">
+      Código inexistente. Por favor, asegurese de que el código sea correcto.
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Bootstrap JS Bundle with Popper -->
+  <script
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
+  ></script>
+</body>
+</html>

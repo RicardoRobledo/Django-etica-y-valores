@@ -1,0 +1,14 @@
+annotated-types==0.7.0
+asgiref==3.8.1
+Django==5.1
+django-qr-code==4.1.0
+gunicorn==23.0.0
+packaging==24.1
+pydantic==2.8.2
+pydantic_core==2.20.1
+python-decouple==3.8
+segno==1.6.1
+sqlparse==0.5.1
+typing_extensions==4.12.2
+tzdata==2024.1
+whitenoise==6.7.0

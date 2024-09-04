@@ -1,0 +1,204 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Denuncia</title>
+    <!-- Agregar enlace a Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/home.css' %}">
+
+</head>
+
+<body class="">
+    <div class="container mt-5">
+        <header class="text-center mb-4">
+            <h1>Sistema de Denuncia</h1>
+            <p>Programa de Integridad</p>
+        </header>
+
+        <!-- Modal -->
+        <div class="modal fade" id="modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h1 class="modal-title fs-5" id="staticBackdropLabel">Modal title</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                <p></p>
+              </div>
+            </div>
+          </div>
+        </div>
+          
+        <div class="container m-4">
+            <form class="my-4 rounded-0 form-container" method="post">
+                {% csrf_token %}
+                <label for="code" class="form-label">¿Tienes un código de denuncia?</label>
+                <div class="mb-4">
+                    <input type="text" id="code" class="form-control rounded-0" placeholder="Introduce tu código (Opcional)" name="code">
+                    <button type="button" class="btn btn-secondary px-5 rounded-0 mt-2" id="search-complaint">Buscar</button>
+                    <div class="invalid-feedback">Por favor, introduce un código válido.</div>
+                </div>
+            </form>
+            <form class="needs-validation rounded-0 form-container" method="post" enctype="multipart/form-data" novalidate>
+                {% csrf_token %}
+                <div class="row">
+                    <!-- Primera Sección -->
+                    <div class="col-lg-6">
+                        <div class="mb-5">
+                            <label for="relation" class="form-label">¿Qué relación tienes con la empresa?</label>
+                            <select id="relation" class="form-select rounded-0" name="relation" required>
+                                <option value="">Selecciona una opción</option>
+                                <option value="colaborador">Colaborador</option>
+                                <option value="excolaborador">Ex Colaborador</option>
+                                <option value="proveedor">Proveedor</option>
+                                <option value="cliente">Cliente</option>
+                            </select>
+                            <div class="invalid-feedback">Por favor, selecciona tu relación con la empresa.</div>
+                        </div>
+
+                        <div class="mb-5">
+                            <label for="city" class="form-label">Ciudad en la que ocurrieron los hechos</label>
+                            <select id="city" class="form-select rounded-0" name="city" required>
+                                <option value="">Selecciona una ciudad</option>
+                                <option value="guadalajara">Guadalajara</option>
+                                <option value="queretaro">Querétaro</option>
+                                <option value="leon">León</option>
+                                <option value="playa">Playa del Carmen</option>
+                                <option value="veracruz">Veracruz</option>
+                                <option value="otro">Otro</option>
+                            </select>
+                            <div class="invalid-feedback">Por favor, selecciona la ciudad.</div>
+                        </div>
+
+                        <div class="mb-5">
+                            <label for="business-unit" class="form-label">Unidad de Negocio en donde ocurrieron los hechos</label>
+                            <input type="text" id="business-unit" class="form-control rounded-0" placeholder="Unidad de Negocio" name="business_unit" maxlength="56" required>
+                            <div class="invalid-feedback">Por favor, ingresa la unidad de negocio.</div>
+                        </div>
+
+                        <div class="mb-5">
+                            <label for="location" class="form-label">Lugar en que ocurrieron los hechos</label>
+                            <input type="text" id="location" class="form-control rounded-0" placeholder="Lugar" name="location" maxlength="56" required>
+                            <div class="invalid-feedback">Por favor, ingresa el lugar de los hechos.</div>
+                        </div>
+
+                        <div class="mb-5">
+                            <label for="date-time" class="form-label">Fecha y Hora Aproximada</label>
+                            <div class="d-flex">
+                                <input type="date" id="date" class="form-control me-2 rounded-0" name="date" required>
+                                <input type="time" id="time" class="form-control rounded-0" name="time" required>
+                            </div>
+                        </div>
+
+                        <div class="mb-5">
+                            <label for="implicated" class="form-label">Nombre de Implicados</label>
+                            <input type="text" id="implicated" class="form-control rounded-0" placeholder="Menciona a todas las personas implicadas en la denuncia" name="implicated" maxlength="500" pattern="^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s,]+$" required>
+                            <div class="invalid-feedback">Por favor, ingresa los nombres de los implicados.</div>
+                        </div>
+
+                        <div>
+                            <label for="classification" class="form-label">¿Cómo clasificarías el reporte?</label>
+                            <select id="classification" class="form-select rounded-0" name="classification" required>
+                                <option value="">Selecciona una opción</option>
+                                <option value="fuga">Fuga de Información</option>
+                                <option value="robo">Robo de Mercancía o Activos</option>
+                                <option value="relacion">Relación Laboral</option>
+                                <option value="hostigamiento">Hostigamiento o Acoso</option>
+                                <option value="codigo">Código de ética</option>
+                                <option value="corrupcion">Corrupción o Soborno</option>
+                                <option value="otro">Otro</option>
+                            </select>
+                            <div class="invalid-feedback">Por favor, selecciona una clasificación para el reporte.</div>
+                        </div>
+
+                        <div class="my-5">
+                            <label for="description" class="form-label">Descripción Detallada de la Denuncia</label>
+                            <textarea id="description" class="form-control rounded-0" rows="4" placeholder="Describe los detalles de la denuncia (1500 caracteres como máximo)" name="description" maxlength="1500" required></textarea>
+                            <div class="invalid-feedback">Por favor, ingresa la descripción detallada.</div>
+                        </div>
+                    </div>
+
+                    <!-- Segunda Sección -->
+                    <div class="col-lg-6">
+                        <div class="mb-5" id="file-container">
+                            <label for="files" class="form-label">Datos adjuntos</label>
+                            <div id="files-container">
+                                <input type="file" id="files" class="form-control mb-2 rounded-0" name="files">
+                            </div>
+                            <div class="invalid-feedback">Por favor, revisa que los campos de los archivos estén en formato jpg, png o pdf y no estén vacíos si es que agregas 2 o más documentos. Agregar archivos es opcional</div>
+                            <button type="button" class="btn btn-secondary mt-2 rounded-0" id="add-file">Agregar otro archivo</button>
+                        </div>
+
+                        <div class="mb-5">
+                            <label for="name" class="form-label rounded-0">Si lo deseas, puedes dejar tu nombre</label>
+                            <input type="text" id="name" class="form-control rounded-0" placeholder="Nombre (Opcional)" name="name" pattern="^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$">
+                        </div>
+
+                        <div class="mb-5" id="email-container">
+                            <label for="email" class="form-label">¿Quieres ser contactado? Deja tu email</label>
+                            <div id="emails-container">
+                                <input type="email" id="email" class="form-control mb-2 rounded-0" placeholder="Correo (Opcional)" name="email">
+                            </div>
+                            <div class="invalid-feedback">Por favor, revisa que los correos estén bien escritos</div>
+                            <button type="button" class="btn btn-secondary mt-2 rounded-0" id="add-email">Agregar otro correo</button>
+                        </div>
+
+                        <div class="mb-5" id="phone-container">
+                            <label for="phone" class="form-label">¿Quieres dejar algún teléfono?</label>
+                            <div id="phones-container">
+                                <div class="d-flex mb-2">
+                                    <select id="phone_type" class="form-select me-2 rounded-0" name="phone_type">
+                                        <option value="celular">Celular</option>
+                                        <option value="casa">Casa</option>
+                                        <option value="oficina">Oficina</option>
+                                        <option value="otro">Otro</option>
+                                    </select>
+                                    <input type="tel" id="phone" class="form-control rounded-0" placeholder="Teléfono (Opcional)" name="phone" pattern="^[0-9]{10}$" minlength="10" maxlength="10">
+                                </div>
+                            </div>
+                            <div class="invalid-feedback">Por favor, revisa que los números de teléfono estén bien escritos</div>
+                            <button type="button" class="btn btn-secondary mt-2 rounded-0" id="add-phone">Agregar otro teléfono</button>
+                        </div>
+
+                        <div class="mb-5">
+                            <label for="source" class="form-label">¿Por qué canal te enteraste?</label>
+                            <select id="source" class="form-select rounded-0" name="source" required>
+                                <option value="">Selecciona una opción</option>
+                                <option value="correo">Correo Electrónico</option>
+                                <option value="poster">Póster</option>
+                                <option value="presentacion">Presentación</option>
+                                <option value="otra">Otra Persona</option>
+                                <option value="internet">Internet</option>
+                                <option value="otro">Otro</option>
+                            </select>
+                            <div class="invalid-feedback">Por favor, selecciona el canal por el cual te enteraste.</div>
+                        </div>
+
+                        <div class="d-grid">
+                            <button id="send-complaint" type="submit" class="btn btn-secondary rounded-0">Enviar denuncia</button>
+                        </div>
+
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+
+    <!-- Agregar enlace a Bootstrap JS y sus dependencias -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.js"
+        integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
+    <script src="{% static 'js/home.js' %}"></script>
+</body>
+
+</html>

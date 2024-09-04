@@ -1,0 +1,22 @@
+body {
+    background-color: rgb(119, 101, 66) !important;
+}
+
+.form-container {
+    backdrop-filter: blur(10px);
+    background-color: rgba(31, 41, 55);
+    padding: 20px;
+    border-radius: 8px;
+}
+
+.form-container label {
+    color: #FFFFFF;
+}
+
+.form-container button {
+    background-color: rgb(109, 92, 61);
+}
+
+.remove-element{
+    background-color: rgb(124, 6, 6) !important;
+}
