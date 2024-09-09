@@ -9,8 +9,21 @@ from django.utils.dateparse import parse_date, parse_time
 from django.utils import timezone
 from django.urls import reverse
 from django.views.decorators.http import require_POST, require_GET
+from django.conf import settings
 
-from ..models import Complaint, Email, Phone, File
+from ..models import (
+    ComplaintModel,
+    EmailModel,
+    PhoneModel,
+    FileModel,
+    PriorityCategoryModel,
+    StatusCategoryModel,
+    ClassificationCategoryModel,
+    ChannelCategoryModel,
+    CityCategoryModel,
+    PhoneTypeCategoryModel,
+    RelationCategoryModel
+)
 
 
 @require_GET
@@ -30,7 +43,7 @@ def search_complaint(request, code):
     This method verify if a complaint exists and return the url
     """
 
-    complaint = Complaint.objects.filter(id=code)
+    complaint = ComplaintModel.objects.filter(id=code)
 
     data = {
         'url': ''
@@ -68,6 +81,8 @@ def create_complaint(request):
     phone_types = request.POST.getlist('phone_types')
     files = request.FILES.getlist('files')
 
+    # --------------- Validations ----------------
+
     if not all([enterprise_relation, date, time, names_involved, report_classification,
                 detailed_description, place, business_unit, city, communication_channel]):
         return JsonResponse(data={"msg": "There are empty required fields"}, status=HTTPStatus.BAD_REQUEST)
@@ -81,35 +96,61 @@ def create_complaint(request):
     if time is None:
         return JsonResponse(data={"msg": "Invalid time"}, status=HTTPStatus.BAD_REQUEST)
 
-    complaint = Complaint.objects.create(
-        enterprise_relation=enterprise_relation,
+    classification = ClassificationCategoryModel.objects.filter(
+        classification=report_classification)
+
+    if not classification.exists():
+        return JsonResponse(data={"msg": "Nonexistent classification"}, status=HTTPStatus.BAD_REQUEST)
+
+    relation = RelationCategoryModel.objects.filter(
+        relation=enterprise_relation)
+
+    if not relation.exists():
+        return JsonResponse(data={"msg": "Nonexistent relation"}, status=HTTPStatus.BAD_REQUEST)
+
+    channel = ChannelCategoryModel.objects.filter(
+        channel=communication_channel)
+
+    if not channel.exists():
+        return JsonResponse(data={"msg": "Nonexistent channel"}, status=HTTPStatus.BAD_REQUEST)
+
+    phone_types = PhoneTypeCategoryModel.objects.filter(
+        phone_type__in=phone_types)
+
+    if phone_type.count() != len(phone_types):
+        return JsonResponse(data={"msg": "Nonexistent phone type"}, status=HTTPStatus.BAD_REQUEST)
+
+    # --------------- Inserts ----------------
+
+    complaint = ComplaintModel.objects.create(
+        business_unit=business_unit,
+        place=place,
         date=date,
         time=time,
         names_involved=names_involved,
-        report_classification=report_classification,
         detailed_description=detailed_description,
-        place=place,
-        business_unit=business_unit,
-        city=city,
         name=name,
-        communication_channel=communication_channel,
+        classification_id=classification,
+        relation_id=relation,
+        city_id=city,
+        channel_id=channel,
     )
 
     for email in emails:
-        Email.objects.create(
+        EmailModel.objects.create(
             email=email,
             complaint_id=complaint,
         )
 
     for phone_type, phone_number in zip(phone_types, phone_numbers):
-        Phone.objects.create(
+        PhoneModel.objects.create(
             phone_type=phone_type,
             phone_number=phone_number,
             complaint_id=complaint,
         )
 
     for file in files:
-        File.objects.create(
+        FileModel.objects.create(
             file=file,
             complaint_id=complaint,
         )
@@ -128,7 +169,7 @@ class ComplaintCreatedView(View):
         This method return our complaint created view
         """
 
-        complaint = Complaint.objects.filter(id=code)
+        complaint = ComplaintModel.objects.filter(id=code)
 
         context = {
             'url': ''
@@ -136,7 +177,7 @@ class ComplaintCreatedView(View):
 
         if complaint.exists():
             url = reverse('app_complaints:status_complaint', args=[code])
-            context['url'] = url
+            context['url'] = f'{settings.BASE_URL}{url}'
 
         return render(request, self.template_name, context)
 
@@ -150,7 +191,7 @@ class StatusComplaintView(View):
         This method return our status complaint view
         """
 
-        complaint = Complaint.objects.filter(id=code)
+        complaint = ComplaintModel.objects.filter(id=code)
 
         context = {
             'code': ''

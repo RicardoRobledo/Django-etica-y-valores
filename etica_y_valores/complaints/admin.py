@@ -1,11 +1,23 @@
-from .models import Email, Phone, File
 from django.contrib import admin
 
-from .models import Complaint, Email, Phone, File
+from .models import (
+    ComplaintModel,
+    EmailModel,
+    PhoneModel,
+    FileModel,
+    ChannelCategoryModel,
+    CityCategoryModel,
+    ClassificationCategoryModel,
+    CommentModel,
+    PhoneTypeCategoryModel,
+    PriorityCategoryModel,
+    RelationCategoryModel,
+    StatusCategoryModel
+)
 
 
 class FileInline(admin.TabularInline):
-    model = File
+    model = FileModel
     extra = 0
     max_num = 0
     can_delete = False
@@ -13,7 +25,7 @@ class FileInline(admin.TabularInline):
 
 
 class EmailInline(admin.TabularInline):
-    model = Email
+    model = EmailModel
     extra = 0
     max_num = 0
     can_delete = False
@@ -21,14 +33,14 @@ class EmailInline(admin.TabularInline):
 
 
 class PhoneInline(admin.TabularInline):
-    model = Phone
+    model = PhoneModel
     extra = 0
     max_num = 0
     can_delete = False
     readonly_fields = ['phone_type', 'phone_number']
 
 
-@admin.register(Complaint)
+@admin.register(ComplaintModel)
 class ComplaintAdmin(admin.ModelAdmin):
     inlines = [FileInline, EmailInline, PhoneInline]
 
@@ -60,6 +72,14 @@ class FileAdmin(admin.ModelAdmin):
         return False
 
 
-admin.site.register(Email, EmailAdmin)
-admin.site.register(Phone, PhoneAdmin)
-admin.site.register(File, FileAdmin)
+admin.site.register(EmailModel, EmailAdmin)
+admin.site.register(PhoneModel, PhoneAdmin)
+admin.site.register(FileModel, FileAdmin)
+admin.site.register(ChannelCategoryModel)
+admin.site.register(CityCategoryModel)
+admin.site.register(ClassificationCategoryModel)
+admin.site.register(CommentModel)
+admin.site.register(PhoneTypeCategoryModel)
+admin.site.register(PriorityCategoryModel)
+admin.site.register(RelationCategoryModel)
+admin.site.register(StatusCategoryModel)

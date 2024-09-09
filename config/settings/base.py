@@ -33,12 +33,16 @@ elif ENVIRONMENT == 'LOCAL':
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = config('SECRET_KEY')
 
+SECRET_KEY_FOR_CIPHER = config('SECRET_KEY_FOR_CIPHER')
+
+BASE_URL = config('BASE_URL')
+
 APPS = [
     'etica_y_valores.complaints',
 ]
 
 THIRD_APPS = [
-    'qr_code'
+    'qr_code',
 ]
 
 DJANGO_APPS = [

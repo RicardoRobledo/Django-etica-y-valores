@@ -78,13 +78,13 @@
 
                         <div class="mb-5">
                             <label for="business-unit" class="form-label">Unidad de Negocio en donde ocurrieron los hechos</label>
-                            <input type="text" id="business-unit" class="form-control rounded-0" placeholder="Unidad de Negocio" name="business_unit" maxlength="56" required>
+                            <input type="text" id="business-unit" class="form-control rounded-0" placeholder="Unidad de Negocio" name="business_unit" maxlength="2000" required>
                             <div class="invalid-feedback">Por favor, ingresa la unidad de negocio.</div>
                         </div>
 
                         <div class="mb-5">
                             <label for="location" class="form-label">Lugar en que ocurrieron los hechos</label>
-                            <input type="text" id="location" class="form-control rounded-0" placeholder="Lugar" name="location" maxlength="56" required>
+                            <input type="text" id="location" class="form-control rounded-0" placeholder="Lugar" name="location" maxlength="2000" required>
                             <div class="invalid-feedback">Por favor, ingresa el lugar de los hechos.</div>
                         </div>
 
@@ -98,7 +98,7 @@
 
                         <div class="mb-5">
                             <label for="implicated" class="form-label">Nombre de Implicados</label>
-                            <input type="text" id="implicated" class="form-control rounded-0" placeholder="Menciona a todas las personas implicadas en la denuncia" name="implicated" maxlength="500" pattern="^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s,]+$" required>
+                            <input type="text" id="implicated" class="form-control rounded-0" placeholder="Menciona a todas las personas implicadas en la denuncia" name="implicated" maxlength="6500" pattern="^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s,]+$" required>
                             <div class="invalid-feedback">Por favor, ingresa los nombres de los implicados.</div>
                         </div>
 
@@ -119,7 +119,7 @@
 
                         <div class="my-5">
                             <label for="description" class="form-label">Descripción Detallada de la Denuncia</label>
-                            <textarea id="description" class="form-control rounded-0" rows="4" placeholder="Describe los detalles de la denuncia (1500 caracteres como máximo)" name="description" maxlength="1500" required></textarea>
+                            <textarea id="description" class="form-control rounded-0" rows="4" placeholder="Describe los detalles de la denuncia (1500 caracteres como máximo)" name="description" maxlength="6500" required></textarea>
                             <div class="invalid-feedback">Por favor, ingresa la descripción detallada.</div>
                         </div>
                     </div>

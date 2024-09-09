@@ -37,11 +37,12 @@
             <div class="col-md-6 mb-4">
                 <div class="card rounded-0">
                     <div class="card-img-top text-center bg-primary p-5">
-                        {% qr_from_text qr_url size="L" %}
+                        {% qr_from_text url size="M" %}
                     </div>
                     <div class="card-body card-body-container rounded-0">
                         <h5 class="card-title text-white">Código QR</h5>
                         <p class="card-text text-white">Escanea este código QR para ver el estado de tu denuncia.</p>
+                        {{ url }}
                     </div>
                 </div>
             </div>
