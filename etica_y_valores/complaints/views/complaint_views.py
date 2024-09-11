@@ -1,3 +1,4 @@
+from django.views.generic import ListView
 from http import HTTPStatus
 
 from django.views import View
@@ -13,9 +14,11 @@ from django.conf import settings
 
 from ..models import (
     ComplaintModel,
+    CommentModel,
     EmailModel,
     PhoneModel,
     FileModel,
+    LogModel,
     PriorityCategoryModel,
     StatusCategoryModel,
     ClassificationCategoryModel,
@@ -96,6 +99,11 @@ def create_complaint(request):
     if time is None:
         return JsonResponse(data={"msg": "Invalid time"}, status=HTTPStatus.BAD_REQUEST)
 
+    city = CityCategoryModel.objects.filter(city=city)
+
+    if not city.exists():
+        return JsonResponse(data={"msg": "Nonexistent city"}, status=HTTPStatus.BAD_REQUEST)
+
     classification = ClassificationCategoryModel.objects.filter(
         classification=report_classification)
 
@@ -117,8 +125,13 @@ def create_complaint(request):
     phone_types = PhoneTypeCategoryModel.objects.filter(
         phone_type__in=phone_types)
 
-    if phone_type.count() != len(phone_types):
+    if phone_types.count() != len(phone_types):
         return JsonResponse(data={"msg": "Nonexistent phone type"}, status=HTTPStatus.BAD_REQUEST)
+
+    city = city.first()
+    relation = relation.first()
+    classification = classification.first()
+    channel = channel.first()
 
     # --------------- Inserts ----------------
 
@@ -134,6 +147,9 @@ def create_complaint(request):
         relation_id=relation,
         city_id=city,
         channel_id=channel,
+        priority_id=PriorityCategoryModel.objects.get(priority='Sin asignar'),
+        status_id=StatusCategoryModel.objects.get(
+            status='Pendiente de Asignar'),
     )
 
     for email in emails:
@@ -154,6 +170,11 @@ def create_complaint(request):
             file=file,
             complaint_id=complaint,
         )
+
+    LogModel.objects.create(
+        complaint_id=complaint,
+        movement='Denuncia creada',
+    )
 
     url = reverse('app_complaints:complaint_created', args=[complaint.id])
 
@@ -182,22 +203,62 @@ class ComplaintCreatedView(View):
         return render(request, self.template_name, context)
 
 
-class StatusComplaintView(View):
+class StatusComplaintView(ListView):
 
+    model = LogModel
     template_name = 'complaints/status_complaint.html'
+    context_object_name = 'objects'
+    paginate_by = 10
+
+    def get_queryset(self):
+        """
+        Este método asegura que los resultados están ordenados
+        """
+        code = self.kwargs.get('code', None)
+        queryset = LogModel.objects.filter(
+            complaint_id=code).order_by('-created_at')
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        """
+        Añade el código de la queja al contexto.
+        """
+        context = super().get_context_data(**kwargs)
+
+        code = self.kwargs.get('code', None)
+        complaint = ComplaintModel.objects.filter(id=code).first()
+
+        context['code'] = code if complaint else ''
+
+        return context
+
+
+class CommentsView(View, LoginRequiredMixin):
+
+    template_name = 'complaints/comments.html'
 
     def get(self, request, code, *args, **kwargs):
         """
-        This method return our status complaint view
+        This method return our comments from a complaint
         """
 
         complaint = ComplaintModel.objects.filter(id=code)
 
-        context = {
-            'code': ''
-        }
-
         if complaint.exists():
-            context['code'] = code
 
-        return render(request, self.template_name, context)
+            data = {
+                'comments': []
+            }
+
+            comments = CommentModel.objects.filter(complaint_id=code)
+            data['comments'] = [
+                {
+                    'comment': comment.comment,
+                    'date': comment.created_at.strftime('%m-%d-%Y'),
+                }
+                for comment in comments
+            ]
+
+            return JsonResponse(data=data, status=HTTPStatus.FOUND)
+
+        return JsonResponse(data={'msg': 'Complaint not found'}, status=HTTPStatus.NOT_FOUND)

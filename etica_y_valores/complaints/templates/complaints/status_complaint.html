@@ -1,11 +1,11 @@
 {% load static %}
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Bootstrap Kanban Board</title>
+  <title>Kanban Board - Movimientos de Denuncias</title>
   <!-- Bootstrap CSS -->
   <link
     href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
@@ -18,103 +18,125 @@
   <div class="container my-5">
     {% if code %}
     <!-- Mostrar contenido del tablero si 'code' no está vacío -->
-    <h1 class="text-center mb-5">Estatus de denuncia</h1>
-    <div class="row gx-4">
+    <h1 class="text-center mb-3">Estatus de denuncia</h1>
+    <h4 class="text-center mb-5" id="code">{{ code }}</h4>
 
-      <!-- To Do Column -->
-      <div class="col-md-3 mb-3">
-        <div class="card column rounded-0">
-          <div class="card-header bg-primary text-white rounded-0">
-            To Do
+    <!-- Offcanvas que se despliega al hacer clic en el botón -->
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvas" aria-labelledby="offcanvasLabel">
+      <div class="offcanvas-header">
+        <h5 id="offcanvasLabel">Comentarios</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+      </div>
+      <div class="offcanvas-body" id="offcanvas-body">
+        <div class="loader-container">
+          <div class="loader">
+            <div class="loader-bar"></div>
           </div>
-          <div class="card-body">
-            <div class="card mb-3 rounded-0">
-              <div class="card-body">
-                Task 1: Design homepage
-              </div>
-            </div>
-            <div class="card mb-3 rounded-0">
-              <div class="card-body">
-                Task 2: Create user flow
-              </div>
-            </div>
-            <div class="card mb-3 rounded-0">
-              <div class="card-body">
-                Task 3: Set up database
-              </div>
-            </div>
-          </div>
+          <h7 class="loader-text">Cargando información...</h7>
         </div>
       </div>
-
-      <!-- In Progress Column -->
-      <div class="col-md-3 mb-3">
-        <div class="card column rounded-0">
-          <div class="card-header bg-warning text-white rounded-0">
-            In Progress
-          </div>
-          <div class="card-body">
-            <div class="card mb-3 rounded-0">
-              <div class="card-body">
-                Task 4: Develop login feature
-              </div>
-            </div>
-            <div class="card mb-3 rounded-0">
-              <div class="card-body">
-                Task 5: API integration
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Review Column -->
-      <div class="col-md-3 mb-3">
-        <div class="card column rounded-0">
-          <div class="card-header bg-info text-white rounded-0">
-            Review
-          </div>
-          <div class="card-body">
-            <div class="card mb-3 rounded-0">
-              <div class="card-body">
-                Task 6: Code review for dashboard
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Done Column -->
-      <div class="col-md-3 mb-3">
-        <div class="card column rounded-0">
-          <div class="card-header bg-success text-white rounded-0">
-            Done
-          </div>
-          <div class="card-body">
-            <div class="card mb-3 rounded-0">
-              <div class="card-body">
-                Task 7: Setup project repository
-              </div>
-            </div>
-            <div class="card mb-3 rounded-0">
-              <div class="card-body">
-                Task 8: Initial project planning
-              </div>
-            </div>
-            <div class="card mb-3 rounded-0">
-              <div class="card-body">
-                Task 9: Requirement gathering
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
     </div>
+
+    <!-- Paginación -->
+    <nav aria-label="Page navigation" class="my-4">
+      <ul class="pagination justify-content-center">
+        {% if is_paginated %}
+          <!-- Botón de Página Anterior -->
+          {% if page_obj.has_previous %}
+          <li class="page-item">
+            <a class="page-link" href="?page=1" aria-label="Primera">
+              Primera
+            </a>
+          </li>
+          <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.previous_page_number }}" aria-label="Anterior">
+              Anterior
+            </a>
+          </li>
+          {% else %}
+          <li class="page-item disabled">
+            <span class="page-link">Primera</span>
+          </li>
+          <li class="page-item disabled">
+            <span class="page-link">Anterior</span>
+          </li>
+          {% endif %}
+
+          <!-- Números de página -->
+          {% for num in page_obj.paginator.page_range %}
+            {% if page_obj.number == num %}
+            <li class="page-item active">
+              <span class="page-link">{{ num }}</span>
+            </li>
+            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+            <li class="page-item">
+              <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+            </li>
+            {% endif %}
+          {% endfor %}
+
+          <!-- Botón de Página Siguiente -->
+          {% if page_obj.has_next %}
+          <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.next_page_number }}" aria-label="Siguiente">
+              Siguiente
+            </a>
+          </li>
+          <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}" aria-label="Última">
+              Última
+            </a>
+          </li>
+          {% else %}
+          <li class="page-item disabled">
+            <span class="page-link">Siguiente</span>
+          </li>
+          <li class="page-item disabled">
+            <span class="page-link">Última</span>
+          </li>
+          {% endif %}
+        {% endif %}
+      </ul>
+    </nav>
+
+    <!-- Tabla con movimientos de la denuncia -->
+    <div class="row gx-4">
+      <div class="">
+        <div class="card column rounded-0">
+          <div class="card-header bg-danger text-white rounded-0">
+            <div class="d-flex justify-content-between align-items-center">
+              <h4 class="text-end mb-0">Últimos movimientos de la denuncia</h4>
+              <form>
+                {% csrf_token %}
+                <button id="btn-comments" class="btn btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvas" aria-controls="offcanvas">
+                  Ver comentarios
+                </button>
+              </form>
+            </div>
+          </div>
+          <div class="card-body">
+            {% for object in objects %}
+            <div class="card mb-3 rounded-0">
+              <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                  <div>
+                    <h6>Movimiento: {{ object.movement }}</h6>
+                    <p>Fecha: {{ object.created_at|date:"d-m-Y" }}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+
     {% else %}
     <!-- Mostrar mensaje si 'code' está vacío -->
     <div class="alert alert-danger text-center" role="alert">
-      Código inexistente. Por favor, asegurese de que el código sea correcto.
+      Código inexistente. Por favor, asegúrese de que el código sea correcto.
     </div>
     {% endif %}
   </div>
@@ -123,5 +145,8 @@
   <script
     src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
   ></script>
+  <script src="https://code.jquery.com/jquery-3.7.1.js"
+        integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
+  <script src="{% static 'js/status_complaint.js' %}"></script>
 </body>
 </html>

@@ -10,6 +10,8 @@ urlpatterns = [
     path('', complaint_views.home_view, name='home'),
     path('complaint/', complaint_views.create_complaint,
          name='create_complaint'),
+    path('complaint/comments/<str:code>/', complaint_views.CommentsView.as_view(),
+         name='search_comments'),
     path('search_complaint/<str:code>/', complaint_views.search_complaint,
          name='search_complaint'),
     path('complaint_created/<str:code>/', complaint_views.ComplaintCreatedView.as_view(),

@@ -1,6 +1,7 @@
 import os
 import uuid
 
+from django.contrib.auth.models import User
 from django.db import models
 
 from etica_y_valores.base.models import BaseModel
@@ -86,17 +87,6 @@ class PhoneTypeCategoryModel(BaseModel):
         return f'{self.phone_type}'
 
 
-class CommentModel(BaseModel):
-
-    complaint_id = models.CharField(max_length=20)
-    user_d = models.IntegerField()
-    comment = models.TextField()
-
-    def __str__(self):
-        # Mostrar un resumen del comentario
-        return f"Comment(id={self.id}, complaint_id={self.complaint_id}, user_d={self.user_d}, comment={self.comment[:50]})"
-
-
 class ComplaintModel(BaseModel):
 
     id = UUIDPrimaryKeyField()
@@ -105,7 +95,7 @@ class ComplaintModel(BaseModel):
     date = models.DateField(null=False)
     time = models.TimeField(null=False)
     names_involved = EncryptedField(null=False, blank=False)
-    end_date = models.DateField(null=False)
+    end_date = models.DateField(null=True, blank=True)
 
     detailed_description = EncryptedField(null=False, blank=False)
     name = EncryptedField(null=True, blank=True)
@@ -121,6 +111,8 @@ class ComplaintModel(BaseModel):
         PriorityCategoryModel, on_delete=models.CASCADE)
     status_id = models.ForeignKey(
         StatusCategoryModel, on_delete=models.CASCADE)
+    user_id = models.ForeignKey(
+        User, null=True, blank=True, on_delete=models.CASCADE)
 
     # Propiedad para descifrar business_unit
     @property
@@ -165,6 +157,55 @@ class ComplaintModel(BaseModel):
                 f'communication_channel={self.channel_id},'
                 f'created_at={self.created_at},'
                 f'updated_at={self.updated_at})')
+
+
+class CommentModel(BaseModel):
+
+    complaint_id = models.ForeignKey(ComplaintModel, on_delete=models.CASCADE)
+    user_id = models.ForeignKey(User, on_delete=models.CASCADE)
+    comment = models.TextField()
+
+    def __repr__(self):
+        # Mostrar un resumen del comentario
+        return f"Comment(id={self.id}, complaint_id={self.complaint_id}, user_d={self.user_id}, comment={self.comment[:50]})"
+
+    def __str__(self):
+        return f'{self.id}'
+
+
+class PermissionModel(BaseModel):
+
+    user_id = models.OneToOneField(User, on_delete=models.CASCADE)
+    guadalajara = models.BooleanField(default=False)
+    queretaro = models.BooleanField(default=False)
+    leon = models.BooleanField(default=False)
+    playa_del_carmen = models.BooleanField(default=False)
+    veracruz = models.BooleanField(default=False)
+    otro = models.BooleanField(default=False)
+    permissions = models.BooleanField(default=False)
+    users = models.BooleanField(default=False)
+    comments = models.BooleanField(default=False)
+
+    def __repr__(self):
+        return f'Permission(user_id={self.user_id}, guadalajara={self.guadalajara}, queretaro={self.queretaro}, leon={self.leon}, playa_del_carmen={self.playa_del_carmen}, veracruz={self.veracruz}, otro={self.otro}, permissions={self.permissions}, users={self.users}, comments={self.comments}, created_at={self.created_at}, updated_at={self.updated_at})'
+
+    def __str__(self):
+        return f'{self.id}'
+
+
+class LogModel(BaseModel):
+
+    complaint_id = models.ForeignKey(
+        ComplaintModel, null=False, blank=False, on_delete=models.CASCADE)
+    user_id = models.ForeignKey(
+        User, null=True, blank=True, on_delete=models.CASCADE)
+    movement = models.CharField(max_length=200, null=False, blank=False)
+
+    def __repr__(self):
+        return f'Log(id={self.id}, complaint_id={self.complaint_id}, user_id={self.user_id}, movement={self.movement}, created_at={self.created_at}, updated_at={self.updated_at})'
+
+    def __str__(self):
+        return f'{self.id}'
 
 
 class EmailModel(BaseModel):

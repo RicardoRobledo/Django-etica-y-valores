@@ -5,3 +5,38 @@ body {
 .column {
     background-color: rgba(31, 41, 55) !important;
 }
+
+
+.loader-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Centra verticalmente */
+    align-items: center; /* Centra horizontalmente */
+    position: absolute; /* Necesario para usar transform */
+    top: 50%; /* Lo coloca al 50% desde la parte superior de la pantalla */
+    left: 50%; /* Lo coloca al 50% desde la izquierda de la pantalla */
+    transform: translate(-50%, -50%); /* Lo mueve hacia arriba y a la izquierda para que esté exactamente en el centro */
+}
+.loader {
+    width: 90px;
+    height: 90px;
+    border: 10px solid #c2c2c2;
+    border-top: 10px solid #252525;
+    border-radius: 50%;
+    animation: spin 1.5s linear infinite;
+}
+.loader-text {
+    margin-top: 20px;
+    font-size: 18px;
+    transition: opacity 0.5s ease-in-out;
+}
+  
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+@keyframes load {
+    0% { width: 0%; }
+    50% { width: 100%; }
+    100% { width: 0%; }
+}

@@ -11,7 +11,7 @@ let emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.(com|org|net|edu|gov|mil|
 let phonePattern = /^[0-9]{10}$/;
 
 const base_url = 'https://django-etica-y-valores.onrender.com';
-//const base_url = 'http://127.0.0.1:8000/';
+//const base_url = 'http://127.0.0.1:8000';
 const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
 
@@ -25,7 +25,6 @@ $(document).ready(function() {
 
 $('#search-complaint').on('click', async function(event){
 
-    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
     const code = $('#code');
 
     // Remueve la clase is-invalid si existe antes de la validación
@@ -54,8 +53,6 @@ $('#search-complaint').on('click', async function(event){
 
 $('#send-complaint').on('click', async function(event){
     event.preventDefault();
-    
-    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
     const relation = $('#relation');
     const city = $('#city');
