@@ -57,8 +57,7 @@ class EncryptedField(models.TextField):
     def get_prep_value(self, value):
         if not value:
             return value
-        valor = self.cipher_suite.encrypt(value.encode()).decode()
-        return valor
+        return self.cipher_suite.encrypt(value.encode()).decode()
 
     def from_db_value(self, value, expression, connection):
         # No descifrar automáticamente cuando se accede desde el admin

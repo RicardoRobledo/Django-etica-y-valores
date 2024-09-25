@@ -14,7 +14,6 @@ from .models import (
     RelationCategoryModel,
     StatusCategoryModel,
     LogModel,
-    PermissionModel,
 )
 
 
@@ -81,9 +80,8 @@ admin.site.register(ChannelCategoryModel)
 admin.site.register(CityCategoryModel)
 admin.site.register(ClassificationCategoryModel)
 admin.site.register(CommentModel)
-admin.site.register(PhoneTypeCategoryModel)
 admin.site.register(PriorityCategoryModel)
+admin.site.register(PhoneTypeCategoryModel)
 admin.site.register(RelationCategoryModel)
 admin.site.register(StatusCategoryModel)
 admin.site.register(LogModel)
-admin.site.register(PermissionModel)

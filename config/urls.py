@@ -23,6 +23,7 @@ from django.conf.urls.static import static
 urlpatterns = [
     path('panel-control/', admin.site.urls),
     path('', include('etica_y_valores.complaints.controllers.urls')),
+    path('users/', include('etica_y_valores.users.controllers.urls')),
 ]
 
 

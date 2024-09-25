@@ -4,6 +4,7 @@ __version__ = '0.1'
 
 def insert_initial_data(apps, schema_editor):
 
+    GroupModel = apps.get_model('auth', 'Group')
     PhoneTypeCategoryModel = apps.get_model(
         'complaints', 'PhoneTypeCategoryModel')
     ChannelCategoryModel = apps.get_model(
@@ -19,81 +20,88 @@ def insert_initial_data(apps, schema_editor):
     PriorityCategoryModel = apps.get_model(
         'complaints', 'PriorityCategoryModel')
 
-    phone_type_categories = (
-        'Celular',
-        'Casa',
-        'Oficina',
-        'Otro',
-    )
+    GroupModel.objects.bulk_create([
+        GroupModel(name=name) for name in (
+            'Querétaro',
+            'León',
+            'Playa del carmen',
+            'Veracruz',
+            'Otro',
+            'Alta',
+            'Media',
+            'Baja',
+            'Usuarios',
+            'Comentarios',
+        )
+    ])
 
-    channel_categories = (
-        'Correo Electrónico',
-        'Póster',
-        'Presentación',
-        'Otra Persona',
-        'Internet',
-        'Otro',
-    )
+    PhoneTypeCategoryModel.objects.bulk_create([
+        PhoneTypeCategoryModel(phone_type=phone_type) for phone_type in (
+            'Celular',
+            'Casa',
+            'Oficina',
+            'Otro',
+        )
+    ])
 
-    relation_categories = (
-        'Colaborador',
-        'Ex Colaborador',
-        'Proveedor',
-        'Cliente'
-    )
+    ChannelCategoryModel.objects.bulk_create([
+        ChannelCategoryModel(channel=channel_category) for channel_category in (
+            'Correo Electrónico',
+            'Póster',
+            'Presentación',
+            'Otra Persona',
+            'Internet',
+            'Otro',
+        )
+    ])
 
-    city_categories = (
-        'Guadalajara',
-        'Querétaro',
-        'León',
-        'Playa del Carmen',
-        'Veracruz',
-        'Otro',
-    )
+    RelationCategoryModel.objects.bulk_create([
+        RelationCategoryModel(relation=relation_category) for relation_category in (
+            'Colaborador',
+            'Ex Colaborador',
+            'Proveedor',
+            'Cliente',
+        )
+    ])
 
-    classification_categories = (
-        'Fuga de Información',
-        'Robo de Mercancía o Activos',
-        'Relación Laboral',
-        'Hostigamiento o Acoso',
-        'Código de ética',
-        'Corrupción o Soborno',
-        'Otro',
-    )
+    CityCategoryModel.objects.bulk_create([
+        CityCategoryModel(city=city_category) for city_category in (
+            'Guadalajara',
+            'Querétaro',
+            'León',
+            'Playa del Carmen',
+            'Veracruz',
+            'Otro',
+        )
+    ])
 
-    status_categories = (
-        'Pendiente de Asignar',
-        'Análisis',
-        'Investigación',
-        'Resolución',
-        'Desestimados',
-    )
+    ClassificationCategoryModel.objects.bulk_create([
+        ClassificationCategoryModel(classification=classification_category) for classification_category in (
+            'Fuga de Información',
+            'Robo de Mercancía o Activos',
+            'Relación Laboral',
+            'Hostigamiento o Acoso',
+            'Código de ética',
+            'Corrupción o Soborno',
+            'Otro',
+        )
+    ])
 
-    priority_categories = (
-        'Sin asignar',
-        'Alta',
-        'Media',
-        'Baja',
-    )
+    StatusCategoryModel.objects.bulk_create([
+        StatusCategoryModel(status=status_category) for status_category in (
+            'Pendiente de Asignar',
+            'Análisis',
+            'Investigación',
+            'Resolución',
+            'Desestimados',
+        )
+    ])
 
-    for phone_type in phone_type_categories:
-        PhoneTypeCategoryModel.objects.create(phone_type=phone_type)
-
-    for channel_category in channel_categories:
-        ChannelCategoryModel.objects.create(channel=channel_category)
-
-    for relation_category in relation_categories:
-        RelationCategoryModel.objects.create(relation=relation_category)
-
-    for city_category in city_categories:
-        CityCategoryModel.objects.create(city=city_category)
-
-    for classification_category in classification_categories:
-        ClassificationCategoryModel.objects.create(
-            classification=classification_category)
-    
-    for status_category in status_categories:
-        StatusCategoryModel.objects.create(status=status_category)
-    
-    for priority_category in priority_categories:
-        PriorityCategoryModel.objects.create(priority=priority_category)
+    PriorityCategoryModel.objects.bulk_create([
+        PriorityCategoryModel(priority=priority_category) for priority_category in (
+            'Sin asignar',
+            'Alta',
+            'Media',
+            'Baja',
+        )
+    ])

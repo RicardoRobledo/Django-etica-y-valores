@@ -273,6 +273,7 @@ $('#send-complaint').on('click', async function(event){
                 return response.json();
             } 
         }).then(data=>{
+            console.log(data);
             window.location.href = data['url'];
         });
 

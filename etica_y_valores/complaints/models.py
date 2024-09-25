@@ -1,13 +1,15 @@
 import os
 import uuid
 
-from django.contrib.auth.models import User
 from django.db import models
+from django.conf import settings
 
 from etica_y_valores.base.models import BaseModel
+from etica_y_valores.enterprises.models import EnterpriseModel
 
 from .custom_fields import UUIDPrimaryKeyField, EncryptedField
 from .custom_validators import validate_custom_email
+from etica_y_valores.base.utils.encrypt_handlers import is_encrypted
 
 
 class ChannelCategoryModel(BaseModel):
@@ -112,7 +114,9 @@ class ComplaintModel(BaseModel):
     status_id = models.ForeignKey(
         StatusCategoryModel, on_delete=models.CASCADE)
     user_id = models.ForeignKey(
-        User, null=True, blank=True, on_delete=models.CASCADE)
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.CASCADE)
+    enterprise_id = models.ForeignKey(
+        EnterpriseModel, null=False, blank=False, on_delete=models.CASCADE)
 
     # Propiedad para descifrar business_unit
     @property
@@ -139,30 +143,90 @@ class ComplaintModel(BaseModel):
     def decrypted_name(self):
         return self._meta.get_field('name').decrypt(self.name) if self.name else None
 
+    def save(self, *args, **kwargs):
+        """
+        Override save method to encrypt fields before saving only if data has changed
+        """
+
+        complaint = ComplaintModel.objects.filter(pk=self.pk)
+
+        if complaint.exists():  # Solo si ya existe en la base de datos
+
+            fields_to_update = []
+            complaint_gotten = complaint.first()
+
+            # Comparar y cifrar solo si el valor ha cambiado
+
+            print(f'bussines unit: {is_encrypted(self.business_unit)}')
+            print(f'place: {is_encrypted(self.place)}')
+            print(f'names involved: {is_encrypted(self.names_involved)}')
+            print(
+                f'detailed description: {is_encrypted(self.detailed_description)}')
+            print(f'name: {is_encrypted(self.name)}')
+
+            if is_encrypted(self.business_unit) and (self.decrypted_business_unit == complaint_gotten.decrypted_business_unit):
+                pass
+            elif not self.business_unit == complaint_gotten.decrypted_business_unit:
+                fields_to_update.append('business_unit')
+
+            if is_encrypted(self.place) and (self.decrypted_place == complaint_gotten.decrypted_place):
+                pass
+            elif not self.place == complaint_gotten.decrypted_place:
+                fields_to_update.append('place')
+
+            if is_encrypted(self.names_involved) and (self.decrypted_names_involved == complaint_gotten.decrypted_names_involved):
+                pass
+            elif not self.names_involved == complaint_gotten.decrypted_names_involved:
+                fields_to_update.append('names_involved')
+
+            if is_encrypted(self.detailed_description) and (self.decrypted_detailed_description == complaint_gotten.decrypted_detailed_description):
+                pass
+            elif not self.detailed_description == complaint_gotten.decrypted_detailed_description:
+                fields_to_update.append('detailed_description')
+
+            if is_encrypted(self.name) and (self.decrypted_name == complaint_gotten.decrypted_name):
+                pass
+            elif not self.name == complaint_gotten.decrypted_name:
+                fields_to_update.append('name')
+
+            print(fields_to_update)
+
+            if fields_to_update:
+                super().save(update_fields=fields_to_update)
+
+        else:
+
+            super().save(*args, **kwargs)
+
     def __str__(self):
         return f'{self.id}'
 
     def __repr__(self):
-        return (f'Complaint(id={self.id},'
-                f'enterprise_relation={self.relation_id},'
-                f'city={self.city_id},'
-                f'business_unit={self.business_unit},'
-                f'place={self.place},'
-                f'date={self.date},'
-                f'time={self.time},'
-                f'names_involved={self.names_involved},'
-                f'report_classification={self.classification_id},'
-                f'detailed_description={self.detailed_description},'
-                f'name={self.name},'
-                f'communication_channel={self.channel_id},'
-                f'created_at={self.created_at},'
+        return (f'Complaint(id={self.id}, '
+                f'business_unit={self.business_unit}, '
+                f'place={self.place}, '
+                f'date={self.date}, '
+                f'time={self.time}, '
+                f'names_involved={self.names_involved}, '
+                f'end_date={self.end_date}, '
+                f'detailed_description={self.detailed_description}, '
+                f'name={self.name}, '
+                f'classification_id={self.classification_id}, '
+                f'relation_id={self.relation_id}, '
+                f'city_id={self.city_id}, '
+                f'channel_id={self.channel_id}, '
+                f'priority_id={self.priority_id}, '
+                f'status_id={self.status_id}, '
+                f'user_id={self.user_id}, '
+                f'created_at={self.created_at}, '
                 f'updated_at={self.updated_at})')
 
 
 class CommentModel(BaseModel):
 
     complaint_id = models.ForeignKey(ComplaintModel, on_delete=models.CASCADE)
-    user_id = models.ForeignKey(User, on_delete=models.CASCADE)
+    user_id = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     comment = models.TextField()
 
     def __repr__(self):
@@ -173,32 +237,12 @@ class CommentModel(BaseModel):
         return f'{self.id}'
 
 
-class PermissionModel(BaseModel):
-
-    user_id = models.OneToOneField(User, on_delete=models.CASCADE)
-    guadalajara = models.BooleanField(default=False)
-    queretaro = models.BooleanField(default=False)
-    leon = models.BooleanField(default=False)
-    playa_del_carmen = models.BooleanField(default=False)
-    veracruz = models.BooleanField(default=False)
-    otro = models.BooleanField(default=False)
-    permissions = models.BooleanField(default=False)
-    users = models.BooleanField(default=False)
-    comments = models.BooleanField(default=False)
-
-    def __repr__(self):
-        return f'Permission(user_id={self.user_id}, guadalajara={self.guadalajara}, queretaro={self.queretaro}, leon={self.leon}, playa_del_carmen={self.playa_del_carmen}, veracruz={self.veracruz}, otro={self.otro}, permissions={self.permissions}, users={self.users}, comments={self.comments}, created_at={self.created_at}, updated_at={self.updated_at})'
-
-    def __str__(self):
-        return f'{self.id}'
-
-
 class LogModel(BaseModel):
 
     complaint_id = models.ForeignKey(
         ComplaintModel, null=False, blank=False, on_delete=models.CASCADE)
     user_id = models.ForeignKey(
-        User, null=True, blank=True, on_delete=models.CASCADE)
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.CASCADE)
     movement = models.CharField(max_length=200, null=False, blank=False)
 
     def __repr__(self):

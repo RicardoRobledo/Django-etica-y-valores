@@ -1,0 +1,4 @@
+.kanban-column{
+    touch-action:pan-x !important;
+    overflow:auto !important;
+}

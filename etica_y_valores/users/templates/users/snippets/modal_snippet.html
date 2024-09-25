@@ -1,0 +1,179 @@
+<!-- Modal -->
+<div class="modal fade" id="modalComplaint" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="modalComplaintLabel" aria-hidden="true">
+    
+    <div class="modal-dialog modal-lg"> <!-- Usamos 'modal-lg' para que sea más grande -->
+      
+        <div class="modal-content">
+        
+        <div class="modal-header">
+          <h4 class="modal-title" id="modalComplaintLabel">Sistema de Denuncia</h4>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        
+        <div class="modal-body">
+            <div class="container">
+        
+                <!-- Modal -->
+                <div class="modal fade" id="modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel">
+                  <div class="modal-dialog">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="staticBackdropLabel">Modal title</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                      </div>
+                      <div class="modal-body">
+                        <p></p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                  
+                <div class="container my-4">
+                    <form class="needs-validation rounded-0 form-container" method="post" enctype="multipart/form-data" novalidate>
+                        {% csrf_token %}
+                        <div class="row">
+                            <!-- Primera Sección -->
+                            <div class="col-lg-6">
+                                <div class="mb-5">
+                                    <label for="relation" class="form-label">¿Qué relación tienes con la empresa?</label>
+                                    <select id="relation" class="form-select rounded-0" name="relation" required>
+                                        <option value="">Selecciona una opción</option>
+                                        <option value="Colaborador">Colaborador</option>
+                                        <option value="Ex Colaborador">Ex Colaborador</option>
+                                        <option value="Proveedor">Proveedor</option>
+                                        <option value="Cliente">Cliente</option>
+                                    </select>
+                                    <div class="invalid-feedback">Por favor, selecciona tu relación con la empresa.</div>
+                                </div>
+        
+                                <div class="mb-5">
+                                    <label for="city" class="form-label">Ciudad en la que ocurrieron los hechos</label>
+                                    <select id="city" class="form-select rounded-0" name="city" required>
+                                        <option value="">Selecciona una ciudad</option>
+                                        <option value="Guadalajara">Guadalajara</option>
+                                        <option value="Querétaro">Querétaro</option>
+                                        <option value="León">León</option>
+                                        <option value="Playa del Carmen">Playa del Carmen</option>
+                                        <option value="Veracruz">Veracruz</option>
+                                        <option value="Otro">Otro</option>
+                                    </select>
+                                    <div class="invalid-feedback">Por favor, selecciona la ciudad.</div>
+                                </div>
+        
+                                <div class="mb-5">
+                                    <label for="business-unit" class="form-label">Unidad de Negocio en donde ocurrieron los hechos</label>
+                                    <input type="text" id="business-unit" class="form-control rounded-0" placeholder="Unidad de Negocio" name="business_unit" maxlength="2000" required>
+                                    <div class="invalid-feedback">Por favor, ingresa la unidad de negocio.</div>
+                                </div>
+        
+                                <div class="mb-5">
+                                    <label for="location" class="form-label">Lugar en que ocurrieron los hechos</label>
+                                    <input type="text" id="location" class="form-control rounded-0" placeholder="Lugar" name="location" maxlength="2000" required>
+                                    <div class="invalid-feedback">Por favor, ingresa el lugar de los hechos.</div>
+                                </div>
+        
+                                <div class="mb-5">
+                                    <label for="date-time" class="form-label">Fecha y Hora Aproximada</label>
+                                    <div class="d-flex">
+                                        <input type="date" id="date" class="form-control me-2 rounded-0" name="date" required>
+                                        <input type="time" id="time" class="form-control rounded-0" name="time" required>
+                                    </div>
+                                </div>
+        
+                                <div class="mb-5">
+                                    <label for="implicated" class="form-label">Nombre de Implicados</label>
+                                    <input type="text" id="implicated" class="form-control rounded-0" placeholder="Menciona a todas las personas implicadas en la denuncia" name="implicated" maxlength="6500" pattern="^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s,]+$" required>
+                                    <div class="invalid-feedback">Por favor, ingresa los nombres de los implicados.</div>
+                                </div>
+        
+                                <div>
+                                    <label for="classification" class="form-label">¿Cómo clasificarías el reporte?</label>
+                                    <select id="classification" class="form-select rounded-0" name="classification" required>
+                                        <option value="">Selecciona una opción</option>
+                                        <option value="Fuga de Información">Fuga de Información</option>
+                                        <option value="Robo de Mercancía o Activos">Robo de Mercancía o Activos</option>
+                                        <option value="Relación Laboral">Relación Laboral</option>
+                                        <option value="Hostigamiento o Acoso">Hostigamiento o Acoso</option>
+                                        <option value="Código de ética">Código de ética</option>
+                                        <option value="Corrupción o Soborno">Corrupción o Soborno</option>
+                                        <option value="Otro">Otro</option>
+                                    </select>
+                                    <div class="invalid-feedback">Por favor, selecciona una clasificación para el reporte.</div>
+                                </div>
+        
+                                <div class="my-5">
+                                    <label for="description" class="form-label">Descripción Detallada de la Denuncia</label>
+                                    <textarea id="description" class="form-control rounded-0" rows="4" placeholder="Describe los detalles de la denuncia (1500 caracteres como máximo)" name="description" maxlength="6500" required></textarea>
+                                    <div class="invalid-feedback">Por favor, ingresa la descripción detallada.</div>
+                                </div>
+                            </div>
+        
+                            <!-- Segunda Sección -->
+                            <div class="col-lg-6">
+                                <div class="mb-5" id="file-container">
+                                    <label for="files" class="form-label">Datos adjuntos</label>
+                                    <div id="files-container">
+                                        <input type="file" id="files" class="form-control mb-2 rounded-0" name="files">
+                                    </div>
+                                    <div class="invalid-feedback">Por favor, revisa que los campos de los archivos estén en formato jpg, png o pdf y no estén vacíos si es que agregas 2 o más documentos. Agregar archivos es opcional</div>
+                                    <button type="button" class="btn btn-secondary mt-2 rounded-0" id="add-file">Agregar otro archivo</button>
+                                </div>
+        
+                                <div class="mb-5">
+                                    <label for="name" class="form-label rounded-0">Si lo deseas, puedes dejar tu nombre</label>
+                                    <input type="text" id="name" class="form-control rounded-0" placeholder="Nombre (Opcional)" name="name" pattern="^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$">
+                                </div>
+        
+                                <div class="mb-5" id="email-container">
+                                    <label for="email" class="form-label">¿Quieres ser contactado? Deja tu email</label>
+                                    <div id="emails-container">
+                                        <input type="email" id="email" class="form-control mb-2 rounded-0" placeholder="Correo (Opcional)" name="email">
+                                    </div>
+                                    <div class="invalid-feedback">Por favor, revisa que los correos estén bien escritos</div>
+                                    <button type="button" class="btn btn-secondary mt-2 rounded-0" id="add-email">Agregar otro correo</button>
+                                </div>
+        
+                                <div class="mb-5" id="phone-container">
+                                    <label for="phone" class="form-label">¿Quieres dejar algún teléfono?</label>
+                                    <div id="phones-container">
+                                        <div class="d-flex mb-2">
+                                            <select id="phone_type" class="form-select me-2 rounded-0" name="phone_type">
+                                                <option value="Celular">Celular</option>
+                                                <option value="Casa">Casa</option>
+                                                <option value="Oficina">Oficina</option>
+                                                <option value="Otro">Otro</option>
+                                            </select>
+                                            <input type="tel" id="phone" class="form-control rounded-0" placeholder="Teléfono (Opcional)" name="phone" pattern="^[0-9]{10}$" minlength="10" maxlength="10">
+                                        </div>
+                                    </div>
+                                    <div class="invalid-feedback">Por favor, revisa que los números de teléfono estén bien escritos</div>
+                                    <button type="button" class="btn btn-secondary mt-2 rounded-0" id="add-phone">Agregar otro teléfono</button>
+                                </div>
+        
+                                <div class="mb-5">
+                                    <label for="source" class="form-label">¿Por qué canal te enteraste?</label>
+                                    <select id="source" class="form-select rounded-0" name="source" required>
+                                        <option value="">Selecciona una opción</option>
+                                        <option value="Correo Electrónico">Correo Electrónico</option>
+                                        <option value="Póster">Póster</option>
+                                        <option value="Presentación">Presentación</option>
+                                        <option value="Otra Persona">Otra Persona</option>
+                                        <option value="Internet">Internet</option>
+                                        <option value="Otro">Otro</option>
+                                    </select>
+                                    <div class="invalid-feedback">Por favor, selecciona el canal por el cual te enteraste.</div>
+                                </div>
+        
+                                <div class="d-grid">
+                                    <button id="send-complaint" type="submit" class="btn btn-secondary rounded-0">Enviar denuncia</button>
+                                </div>
+        
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+      </div>
+    </div>
+</div>

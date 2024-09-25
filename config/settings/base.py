@@ -38,7 +38,10 @@ SECRET_KEY_FOR_CIPHER = config('SECRET_KEY_FOR_CIPHER')
 BASE_URL = config('BASE_URL')
 
 APPS = [
+    'etica_y_valores.base',
     'etica_y_valores.complaints',
+    'etica_y_valores.users',
+    'etica_y_valores.enterprises',
 ]
 
 THIRD_APPS = [
@@ -77,6 +80,8 @@ TEMPLATES = [
             os.path.join(BASE_DIR, 'etica_y_valores/base/templates'),
             os.path.join(
                 BASE_DIR, 'etica_y_valores/complaints/templates'),
+            os.path.join(
+                BASE_DIR, 'etica_y_valores/users/templates'),
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -134,6 +139,8 @@ USE_TZ = True
 
 TIME_ZONE = 'America/Mexico_City'
 
+AUTH_USER_MODEL = 'users.UserModel'
+
 # LOGIN_REDIRECT_URL = '/'
 # LOGOUT_REDIRECT_URL = '/'
 LOGIN_URL = '/'
@@ -154,6 +161,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'etica_y_valores/complaints/templates/static'),
+    os.path.join(BASE_DIR, 'etica_y_valores/users/templates/static'),
 ]
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 

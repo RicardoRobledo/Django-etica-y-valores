@@ -1,0 +1,81 @@
+{% extends "users/base.html" %}
+
+{% load static %}
+
+{% block title %}
+    Denuncias Tabla
+{% endblock %}
+
+{% block content %}
+
+{% include 'users/snippets/modal_snippet.html' %}
+
+<div class="container-fluid p-0">
+
+    <!-- Main Content with Scrollable Table-->
+    <div class="table-responsive">
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped">
+                <thead class="table-dark bg-primary">
+                    <tr>
+                        <th>Acción</th>
+                        <th>¿Que relación tienes con la empresa?</th>
+                        <th>Ciudad en la que ocurrieron los hechos</th>
+                        <th>Unidad de Negocio en donde ocurrieron los hechos</th>
+                        <th>Lugar en que ocurrieron los hechos</th>
+                        <th>Fecha y Hora Aproximada</th>
+                        <th>Nombre de Implicados</th>
+                        <th>¿Cómo clasificarías el reporte?</th>
+                        <th>Descripción Detallada de la Denuncia</th>
+                        <th>Archivos adjuntos</th>
+                        <th>Nombre</th>
+                        <th>Email</th>
+                        <th>Teléfono</th>
+                        <th>Canal</th>
+                        <th>Prioridad</th>
+                        <th>Estatus</th>
+                        <th>Encargado</th>
+                        <th>Fecha de Registro</th>
+                        <th>Fecha de Cierre</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                        {% for complaint in complaints %}
+                        <tr>
+                            <td>
+                                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalComplaint">
+                                    Modificar
+                                </button>
+                            </td>
+                            <td>{{complaint.relation_id.relation|default_if_none:''}}</td>
+                            <td>{{complaint.city_id.city|default_if_none:''}}</td>
+                            <td>{{complaint.decrypted_business_unit|default_if_none:''}}</td>
+                            <td>{{complaint.decrypted_place|default_if_none:''}}</td>
+                            <td>{{complaint.created_at|date:"d/m/Y"}}</td>
+                            <td>{{complaint.decrypted_names_involved|default_if_none:''}}</td>
+                            <td>{{complaint.classification_id.classification}}</td>
+                            <td>{{complaint.decrypted_detailed_description|default_if_none:''}}</td>
+                            <td></td>
+                            <td>{{complaint.decrypted_name|default_if_none:''}}</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div> 
+        </div>
+    </div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dragula/3.7.3/dragula.min.js"></script>
+<script src="{% static 'js/home_kanban_staff.js' %}"></script>
+{% endblock %}

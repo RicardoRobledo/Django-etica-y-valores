@@ -1,17 +1,23 @@
+import json
+
 from django.views.generic import ListView
 from http import HTTPStatus
 
 from django.views import View
-from django.shortcuts import render, redirect
+from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
-from django.views import View
+from django.db.models import Count, F
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_http_methods
 from django.utils.dateparse import parse_date, parse_time
 from django.utils import timezone
+
 from django.urls import reverse
-from django.views.decorators.http import require_POST, require_GET
+from django.views.decorators.http import require_GET
 from django.conf import settings
 
+from etica_y_valores.enterprises.models import EnterpriseModel
 from ..models import (
     ComplaintModel,
     CommentModel,
@@ -27,6 +33,7 @@ from ..models import (
     PhoneTypeCategoryModel,
     RelationCategoryModel
 )
+from etica_y_valores.users.utils.user_handlers import get_grouped_user_permissions
 
 
 @require_GET
@@ -61,7 +68,234 @@ def search_complaint(request, code):
         return JsonResponse(data=data, status=HTTPStatus.NOT_FOUND)
 
 
-@require_POST
+@login_required
+@require_http_methods(["DELETE"])
+def delete_complaint(request, code):
+
+    complaint = ComplaintModel.objects.filter(id=code)
+
+    if not complaint.exists():
+        return JsonResponse(data={"msg": "Complaint not found"}, status=HTTPStatus.NOT_FOUND)
+
+    complaint.update(
+        status_id=StatusCategoryModel.objects.get(status='Desestimados'))
+
+    return JsonResponse({'msg': 'complaint not proceeded'}, status=HTTPStatus.OK)
+
+
+@login_required
+@require_GET
+def complaints_count(request):
+    """
+    This function returns the count of complaints
+    """
+
+    # user
+    user = request.user
+
+    # user level
+    user_level = user.user_level_id.user_level
+
+    if user_level == 'Superusuario':
+
+        # all complaints
+        all_complaints = ComplaintModel.objects.filter(
+            enterprise_id__subdomain=request.get_host())
+
+        # all complaints opened
+        all_complaints_opened = all_complaints.exclude(
+            status_id__status__in=['Desestimados', 'Resolución'])
+
+        # all complaints opened count
+        all_complaints_opened_count = all_complaints_opened.count()
+
+        # all complaints closed count
+        all_complaints_closed_count = all_complaints.filter(
+            status_id__status='Resolución').count()
+
+        # all complaints by status
+        all_complaints_by_status = list(
+            all_complaints_opened.values(
+                status=F('status_id__status')
+            ).annotate(
+                count=Count('id')
+            ))
+
+        # all complaints by city
+        all_complaints_by_city = list(all_complaints_opened.values(
+            city=F('city_id__city')
+        ).annotate(
+            count=Count('city')
+        ))
+
+        # all complaints by priority
+        all_complaints_by_priority = list(all_complaints_opened.values(
+            priority=F('priority_id__priority')
+        ).annotate(
+            count=Count('id')
+        ))
+
+        # all complaints by classification
+        all_complaints_by_classification = list(all_complaints_opened.values(
+            classification=F('classification_id__classification')
+        ).annotate(
+            count=Count('id')
+        ))
+
+        # all complaints by communication channel
+        all_complaints_by_channel = list(all_complaints_opened.values(
+            channel=F('channel_id__channel')
+        ).annotate(
+            count=Count('id')
+        ))
+
+        response = JsonResponse(data={
+            'all_complaints_opened_count': all_complaints_opened_count,
+            'all_complaints_closed_count': all_complaints_closed_count,
+            'all_complaints_by_status': all_complaints_by_status,
+            'all_complaints_by_city': all_complaints_by_city,
+            'all_complaints_by_priority': all_complaints_by_priority,
+            'all_complaints_by_classification': all_complaints_by_classification,
+            'all_complaints_by_channel': all_complaints_by_channel,
+        }, status=HTTPStatus.OK)
+
+    elif user_level == 'Supervisor':
+
+        # all complaints
+        all_complaints = ComplaintModel.objects.filter(
+            enterprise_id__subdomain=request.get_host())
+
+        # all complaints opened
+        all_complaints_opened = all_complaints.exclude(
+            status_id__status__in=['Desestimados', 'Resolución'])
+
+        # all complaints opened count
+        all_complaints_opened_count = all_complaints_opened.count()
+
+        # all complaints closed count
+        all_complaints_closed_count = all_complaints.filter(
+            status_id__status='Resolución').count()
+
+        # all complaints by status
+        all_complaints_by_status = list(
+            all_complaints_opened.values(
+                status=F('status_id__status')
+            ).annotate(
+                count=Count('id')
+            ))
+
+        # all complaints by city
+        all_complaints_by_city = list(all_complaints_opened.values(
+            city=F('city_id__city')
+        ).annotate(
+            count=Count('city')
+        ))
+
+        # all complaints by priority
+        all_complaints_by_priority = list(all_complaints_opened.values(
+            priority=F('priority_id__priority')
+        ).annotate(
+            count=Count('id')
+        ))
+
+        # all complaints by classification
+        all_complaints_by_classification = list(all_complaints_opened.values(
+            classification=F('classification_id__classification')
+        ).annotate(
+            count=Count('id')
+        ))
+
+        # all complaints by communication channel
+        all_complaints_by_channel = list(all_complaints_opened.values(
+            channel=F('channel_id__channel')
+        ).annotate(
+            count=Count('id')
+        ))
+
+        response = JsonResponse(data={
+            'all_complaints_opened_count': all_complaints_opened_count,
+            'all_complaints_closed_count': all_complaints_closed_count,
+            'all_complaints_by_status': all_complaints_by_status,
+            'all_complaints_by_city': all_complaints_by_city,
+            'all_complaints_by_priority': all_complaints_by_priority,
+            'all_complaints_by_classification': all_complaints_by_classification,
+            'all_complaints_by_channel': all_complaints_by_channel,
+        }, status=HTTPStatus.OK)
+
+    else:
+
+        # all user groups (permissions)
+        user_permissions = get_grouped_user_permissions(user)
+
+        # all user complaints
+        all_user_complaints = ComplaintModel.objects.filter(
+            enterprise_id__subdomain=request.get_host(),
+            user_id__id=user.id,
+            city_id__city__in=user_permissions['cities'],
+            priority_id__priority__in=user_permissions['priorities'],)
+
+        # all user complaints opened
+        all_complaints_opened = all_user_complaints.exclude(
+            status_id__status__in=['Desestimados', 'Resolución'])
+
+        # all user complaints opened count
+        all_complaints_opened_count = all_complaints_opened.count()
+
+        # all user complaints closed count
+        all_complaints_closed_count = all_user_complaints.filter(
+            status_id__status='Resolución').count()
+
+        # all user complaints by status
+        all_complaints_by_status = list(
+            all_complaints_opened.values(
+                status=F('status_id__status')
+            ).annotate(
+                count=Count('id')
+            ))
+
+        # all user complaints by city
+        all_complaints_by_city = list(all_complaints_opened.values(
+            city=F('city_id__city')
+        ).annotate(
+            count=Count('city')
+        ))
+
+        # all complaints by priority
+        all_complaints_by_priority = list(all_complaints_opened.values(
+            priority=F('priority_id__priority')
+        ).annotate(
+            count=Count('id')
+        ))
+
+        # all complaints by classification
+        all_complaints_by_classification = list(all_complaints_opened.values(
+            classification=F('classification_id__classification')
+        ).annotate(
+            count=Count('id')
+        ))
+
+        # all complaints by communication channel
+        all_complaints_by_channel = list(all_complaints_opened.values(
+            channel=F('channel_id__channel')
+        ).annotate(
+            count=Count('id')
+        ))
+
+        response = JsonResponse(data={
+            'all_complaints_opened_count': all_complaints_opened_count,
+            'all_complaints_closed_count': all_complaints_closed_count,
+            'all_complaints_by_status': all_complaints_by_status,
+            'all_complaints_by_city': all_complaints_by_city,
+            'all_complaints_by_priority': all_complaints_by_priority,
+            'all_complaints_by_classification': all_complaints_by_classification,
+            'all_complaints_by_channel': all_complaints_by_channel,
+        }, status=HTTPStatus.OK)
+
+    return response
+
+
+@login_required
+@require_http_methods(["POST"])
 def create_complaint(request):
     """
     This function validates the form and creates a Complaint.
@@ -150,6 +384,7 @@ def create_complaint(request):
         priority_id=PriorityCategoryModel.objects.get(priority='Sin asignar'),
         status_id=StatusCategoryModel.objects.get(
             status='Pendiente de Asignar'),
+        enterprise_id=EnterpriseModel.objects.get(subdomain=request.get_host())
     )
 
     for email in emails:
@@ -177,8 +412,42 @@ def create_complaint(request):
     )
 
     url = reverse('app_complaints:complaint_created', args=[complaint.id])
+    print(url)
 
     return JsonResponse(data={'url': url}, status=HTTPStatus.CREATED)
+
+
+@require_http_methods(["PUT"])
+def update_complaint_priority(request, code):
+    """
+    This function updates the priority of a complaint
+    """
+
+    new_priority = json.loads(request.body).get('new_priority', '')
+
+    if not new_priority:
+        return JsonResponse(data={"msg": "new priority is required"}, status=HTTPStatus.BAD_REQUEST)
+
+    complaint = ComplaintModel.objects.filter(id=code)
+
+    if not complaint.exists():
+        return JsonResponse(data={"msg": "Complaint not found"}, status=HTTPStatus.NOT_FOUND)
+
+    priority = PriorityCategoryModel.objects.filter(id=new_priority)
+
+    if not priority.exists():
+        return JsonResponse(data={"msg": "Priority not found"}, status=HTTPStatus.NOT_FOUND)
+
+    priority_object = priority.first()
+    complaint.update(priority_id=priority_object)
+
+    LogModel.objects.create(
+        complaint_id=complaint.first(),
+        user_id=request.user,
+        movement=f'Prioridad de denuncia actualizada a {priority_object.priority}',
+    )
+
+    return JsonResponse({'msg': 'complaint status updated'}, status=HTTPStatus.OK)
 
 
 class ComplaintCreatedView(View):
@@ -212,7 +481,7 @@ class StatusComplaintView(ListView):
 
     def get_queryset(self):
         """
-        Este método asegura que los resultados están ordenados
+        This method ensures that the results are ordered
         """
         code = self.kwargs.get('code', None)
         queryset = LogModel.objects.filter(
@@ -221,7 +490,7 @@ class StatusComplaintView(ListView):
 
     def get_context_data(self, **kwargs):
         """
-        Añade el código de la queja al contexto.
+        Add the complaint code to the context
         """
         context = super().get_context_data(**kwargs)
 
