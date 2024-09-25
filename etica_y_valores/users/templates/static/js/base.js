@@ -1,3 +1,7 @@
+const url = 'https://django-etica-y-valores.onrender.com';
+//const url = 'http://127.0.0.1:8000';
+
+
 $('#menu-button').on('click', async function () {
 
     $('.loader-wrapper').show();
