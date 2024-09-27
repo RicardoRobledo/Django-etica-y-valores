@@ -8,7 +8,7 @@ def get_grouped_user_permissions(user):
 
     return {
         'cities': [permission for permission in permissions if permission in [
-            'Querétaro', 'León', 'Playa del carmen', 'Veracruz', 'Otro']],
+            'Querétaro', 'León', 'Playa del Carmen', 'Guadalajara', 'Veracruz', 'Otro']],
         'priorities': [permission for permission in permissions if permission in [
             'Alta', 'Baja', 'Media']],
         'tasks': [permission for permission in permissions if permission in [

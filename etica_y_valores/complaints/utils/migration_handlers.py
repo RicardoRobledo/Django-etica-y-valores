@@ -24,8 +24,9 @@ def insert_initial_data(apps, schema_editor):
         GroupModel(name=name) for name in (
             'Querétaro',
             'León',
-            'Playa del carmen',
+            'Playa del Carmen',
             'Veracruz',
+            'Guadalajara',
             'Otro',
             'Alta',
             'Media',

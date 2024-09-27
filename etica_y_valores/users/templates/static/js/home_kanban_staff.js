@@ -97,6 +97,20 @@ async function updateComplaintPriority(el, code, newPriority) {
     priorityElement.textContent = 'Prioridad: ' + newPriority;
 }
 
+async function closeComplaint(id){
+
+    await fetch(`${url}/close_complaint/${id}/`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrftoken
+        },
+    });
+
+    location.reload();
+
+}
+
 function notProceedComplaint(code){
     $('#notProceedComplaintButtonModal').attr('onclick', 'notProceedComplaintModal("'+code+'")');
 };

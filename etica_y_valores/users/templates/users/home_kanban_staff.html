@@ -86,18 +86,18 @@
     <div class="kanban-board mt-2">
 
         <!-- Columna Sin Asignar -->
-        <div class="kanban-column" id="Sin-asignar">
-            <h2>Sin asignar</h2>
+        <div class="kanban-column rounded-0" id="Sin-asignar">
+            <h2 class="rounded-0">Sin asignar</h2>
             <div class="kanban-cards">
                 {% for complaint in complaints %}
                     {% if complaint.priority_id.id == 1 %}
-                    <div class="kanban-card" id="{{ complaint.id }}">
+                    <div class="kanban-card rounded-0" id="{{ complaint.id }}">
                         <h3>Ciudad: {{ complaint.city_id.city }}</h3>
                         <p>Prioridad: {{ complaint.priority_id.priority }}</p>
                         <p>Responsable: {{ complaint.user_id.first_name }}</p>
                         <p>Fecha: {{ complaint.created_at|date:"d/m/Y" }}</p>
                         <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalComplaint" onclick="modificarDenuncia('{{ complaint.id }}')">Modificar</button>
-                        <button class="btn btn-success" onclick="cerrarDenuncia('{{ complaint.id }}')">Cerrar</button>
+                        <button class="btn btn-success" onclick="closeComplaint('{{ complaint.id }}')">Cerrar</button>
                         {% if user.user_level_id.user_level == 'Superusuario' %}
                             <button class="btn btn-danger" onclick="notProceedComplaint('{{ complaint.id }}')" data-bs-toggle="modal" data-bs-target="#notProceedComplaintModal">No proceder</button>
                         {% endif %}
@@ -108,18 +108,18 @@
         </div>
 
         <!-- Columna Prioridad Alta -->
-        <div class="kanban-column" id="Alta">
-            <h2>Alta</h2>
+        <div class="kanban-column rounded-0" id="Alta">
+            <h2 class="rounded-0">Alta</h2>
             <div class="kanban-cards">
                 {% for complaint in complaints %}
                     {% if complaint.priority_id.id == 2 %}
-                    <div class="kanban-card" id="{{ complaint.id }}">
+                    <div class="kanban-card rounded-0" id="{{ complaint.id }}">
                         <h3>Ciudad: {{ complaint.city_id.city }}</h3>
                         <p>Prioridad: {{ complaint.priority_id.priority }}</p>
                         <p>Responsable: {{ complaint.user_id.first_name }}</p>
                         <p>Fecha: {{ complaint.created_at|date:"d/m/Y" }}</p>
                         <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalComplaint" onclick="modificarDenuncia('{{ complaint.id }}')">Modificar</button>
-                        <button class="btn btn-success" onclick="cerrarDenuncia('{{ complaint.id }}')">Cerrar</button>
+                        <button class="btn btn-success" onclick="closeComplaint('{{ complaint.id }}')">Cerrar</button>
                         {% if user.user_level_id.user_level == 'Superusuario' %}
                             <button class="btn btn-danger" onclick="notProceedComplaint('{{ complaint.id }}')" data-bs-toggle="modal" data-bs-target="#notProceedComplaintModal">No proceder</button>
                         {% endif %}
@@ -130,18 +130,18 @@
         </div>
 
         <!-- Columna Prioridad Media -->
-        <div class="kanban-column" id="Media">
-            <h2>Media</h2>
+        <div class="kanban-column rounded-0" id="Media">
+            <h2 class="rounded-0">Media</h2>
             <div class="kanban-cards">
                 {% for complaint in complaints %}
                     {% if complaint.priority_id.id == 3 %}
-                    <div class="kanban-card" id="{{ complaint.id }}">
+                    <div class="kanban-card rounded-0" id="{{ complaint.id }}">
                         <h3>Ciudad: {{ complaint.city_id.city }}</h3>
                         <p>Prioridad: {{ complaint.priority_id.priority }}</p>
                         <p>Responsable: {{ complaint.user_id.first_name }}</p>
                         <p>Fecha: {{ complaint.created_at|date:"d/m/Y" }}</p>
                         <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalComplaint" onclick="modificarDenuncia('{{ complaint.id }}')">Modificar</button>
-                        <button class="btn btn-success" onclick="cerrarDenuncia('{{ complaint.id }}')">Cerrar</button>
+                        <button class="btn btn-success" onclick="closeComplaint('{{ complaint.id }}')">Cerrar</button>
                         {% if user.user_level_id.user_level == 'Superusuario' %}
                             <button class="btn btn-danger" onclick="notProceedComplaint('{{ complaint.id }}')" data-bs-toggle="modal" data-bs-target="#notProceedComplaintModal">No proceder</button>
                         {% endif %}
@@ -152,18 +152,18 @@
         </div>
 
         <!-- Columna Prioridad Baja -->
-        <div class="kanban-column" id="Baja">
-            <h2>Baja</h2>
+        <div class="kanban-column rounded-0" id="Baja">
+            <h2 class="rounded-0">Baja</h2>
             <div class="kanban-cards">
                 {% for complaint in complaints %}
                     {% if complaint.priority_id.id == 4 %}
-                    <div class="kanban-card" id="{{ complaint.id }}">
+                    <div class="kanban-card rounded-0" id="{{ complaint.id }}">
                         <h3>Ciudad: {{ complaint.city_id.city }}</h3>
                         <p>Prioridad: {{ complaint.priority_id.priority }}</p>
                         <p>Responsable: {{ complaint.user_id.first_name }}</p>
                         <p>Fecha: {{ complaint.created_at|date:"d/m/Y" }}</p>
                         <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalComplaint" onclick="modificarDenuncia('{{ complaint.id }}')">Modificar</button>
-                        <button class="btn btn-success" onclick="cerrarDenuncia('{{ complaint.id }}')">Cerrar</button>
+                        <button class="btn btn-success" onclick="closeComplaint('{{ complaint.id }}')">Cerrar</button>
                         {% if user.user_level_id.user_level == 'Superusuario' %}
                             <button class="btn btn-danger" onclick="notProceedComplaint('{{ complaint.id }}')" data-bs-toggle="modal" data-bs-target="#notProceedComplaintModal">No proceder</button>
                         {% endif %}

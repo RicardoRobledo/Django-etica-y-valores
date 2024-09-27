@@ -24,6 +24,8 @@ urlpatterns = [
          name='create_complaint'),
     path('complaint/count/', complaint_views.complaints_count,
          name="complaint_count"),
+    path('close_complaint/<str:code>/', complaint_views.close_complaint,
+         name="close_complaint"),
     path('complaint/<str:code>/', complaint_views.delete_complaint,
          name='delete_complaint'),
     path('complaint/complaint_priority/<str:code>/', complaint_views.update_complaint_priority,

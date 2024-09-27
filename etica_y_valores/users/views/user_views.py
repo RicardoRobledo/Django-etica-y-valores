@@ -82,6 +82,8 @@ class HomeKanbanStaffView(LoginRequiredMixin, ListView):
                 user_id__id=user.id,
                 city_id__city__in=user_permissions['cities'],
                 priority_id__priority__in=user_permissions['priorities'],
+            ).exclude(
+                status_id__status__in=['Desestimados', 'Resolución']
             ).order_by('-created_at')
 
         return response
@@ -96,4 +98,32 @@ class TableComplaintsStaffView(LoginRequiredMixin, ListView):
     model = ComplaintModel
     template_name = 'users/table_complaints.html'
     context_object_name = 'complaints'
-    paginate_by = 10
+    paginate_by = 12
+
+    def get_queryset(self):
+        """
+        Override this method to return complaints ordered by creation date.
+        """
+
+        user_level = self.request.user.user_level_id.user_level
+
+        if user_level == 'Superusuario' or user_level == 'Supervisor':
+
+            response = ComplaintModel.objects.filter(
+                enterprise_id__subdomain=self.request.get_host(),
+            ).order_by('-created_at')
+
+        else:
+
+            user = self.request.user
+
+            user_permissions = get_grouped_user_permissions(user)
+
+            response = ComplaintModel.objects.filter(
+                enterprise_id__subdomain=self.request.get_host(),
+                user_id__id=user.id,
+                city_id__city__in=user_permissions['cities'],
+                priority_id__priority__in=user_permissions['priorities'],
+            ).order_by('-created_at')
+
+        return response

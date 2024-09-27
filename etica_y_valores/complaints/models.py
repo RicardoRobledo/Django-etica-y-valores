@@ -94,10 +94,9 @@ class ComplaintModel(BaseModel):
     id = UUIDPrimaryKeyField()
     business_unit = EncryptedField(null=False, blank=False)
     place = EncryptedField(null=False, blank=False)
-    date = models.DateField(null=False)
-    time = models.TimeField(null=False)
+    date_time = models.DateTimeField(null=False, blank=False)
+    close_date = models.DateTimeField(null=True, blank=True)
     names_involved = EncryptedField(null=False, blank=False)
-    end_date = models.DateField(null=True, blank=True)
 
     detailed_description = EncryptedField(null=False, blank=False)
     name = EncryptedField(null=True, blank=True)
@@ -152,47 +151,42 @@ class ComplaintModel(BaseModel):
 
         if complaint.exists():  # Solo si ya existe en la base de datos
 
-            fields_to_update = []
+            encrypted_fields_to_update = []
             complaint_gotten = complaint.first()
 
             # Comparar y cifrar solo si el valor ha cambiado
 
-            print(f'bussines unit: {is_encrypted(self.business_unit)}')
-            print(f'place: {is_encrypted(self.place)}')
-            print(f'names involved: {is_encrypted(self.names_involved)}')
-            print(
-                f'detailed description: {is_encrypted(self.detailed_description)}')
-            print(f'name: {is_encrypted(self.name)}')
-
             if is_encrypted(self.business_unit) and (self.decrypted_business_unit == complaint_gotten.decrypted_business_unit):
                 pass
             elif not self.business_unit == complaint_gotten.decrypted_business_unit:
-                fields_to_update.append('business_unit')
+                encrypted_fields_to_update.append('business_unit')
 
             if is_encrypted(self.place) and (self.decrypted_place == complaint_gotten.decrypted_place):
                 pass
             elif not self.place == complaint_gotten.decrypted_place:
-                fields_to_update.append('place')
+                encrypted_fields_to_update.append('place')
 
             if is_encrypted(self.names_involved) and (self.decrypted_names_involved == complaint_gotten.decrypted_names_involved):
                 pass
             elif not self.names_involved == complaint_gotten.decrypted_names_involved:
-                fields_to_update.append('names_involved')
+                encrypted_fields_to_update.append('names_involved')
 
             if is_encrypted(self.detailed_description) and (self.decrypted_detailed_description == complaint_gotten.decrypted_detailed_description):
                 pass
             elif not self.detailed_description == complaint_gotten.decrypted_detailed_description:
-                fields_to_update.append('detailed_description')
+                encrypted_fields_to_update.append('detailed_description')
 
             if is_encrypted(self.name) and (self.decrypted_name == complaint_gotten.decrypted_name):
                 pass
             elif not self.name == complaint_gotten.decrypted_name:
-                fields_to_update.append('name')
+                encrypted_fields_to_update.append('name')
 
-            print(fields_to_update)
+            common_fields = [field.name for field in ComplaintModel._meta.get_fields()
+                             if not isinstance(field, EncryptedField) and field.concrete and not field.many_to_many and not field.name == 'id']
 
-            if fields_to_update:
-                super().save(update_fields=fields_to_update)
+            print(encrypted_fields_to_update+common_fields)
+
+            super().save(update_fields=encrypted_fields_to_update+common_fields)
 
         else:
 
@@ -205,10 +199,9 @@ class ComplaintModel(BaseModel):
         return (f'Complaint(id={self.id}, '
                 f'business_unit={self.business_unit}, '
                 f'place={self.place}, '
-                f'date={self.date}, '
-                f'time={self.time}, '
+                f'date_time={self.date_time}, '
+                f'close_date={self.close_date}, '
                 f'names_involved={self.names_involved}, '
-                f'end_date={self.end_date}, '
                 f'detailed_description={self.detailed_description}, '
                 f'name={self.name}, '
                 f'classification_id={self.classification_id}, '
@@ -255,7 +248,8 @@ class LogModel(BaseModel):
 class EmailModel(BaseModel):
 
     email = models.EmailField(validators=[validate_custom_email])
-    complaint_id = models.ForeignKey(ComplaintModel, on_delete=models.CASCADE)
+    complaint_id = models.ForeignKey(
+        ComplaintModel, on_delete=models.CASCADE, related_name='emails')
 
     def __repr__(self):
         return f'Email(email={self.email}, complaint_id={self.complaint_id})'
@@ -269,7 +263,8 @@ class PhoneModel(BaseModel):
     phone_type = models.ForeignKey(
         PhoneTypeCategoryModel, on_delete=models.CASCADE)
     phone_number = models.CharField(null=False, max_length=10)
-    complaint_id = models.ForeignKey(ComplaintModel, on_delete=models.CASCADE)
+    complaint_id = models.ForeignKey(
+        ComplaintModel, on_delete=models.CASCADE, related_name='phones')
 
     def __repr__(self):
         return f'Phone(phone_type={self.phone_type}, phone_number={self.phone_number}, complaint_id={self.complaint_id})'
@@ -291,7 +286,8 @@ def unique_file_path(instance, filename):
 class FileModel(BaseModel):
 
     file = models.FileField(upload_to=unique_file_path)
-    complaint_id = models.ForeignKey(ComplaintModel, on_delete=models.CASCADE)
+    complaint_id = models.ForeignKey(
+        ComplaintModel, on_delete=models.CASCADE, related_name='files')
 
     def __repr__(self):
         return f'File(file={self.file}, complaint_id={self.complaint_id})'

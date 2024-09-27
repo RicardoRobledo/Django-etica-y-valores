@@ -2,6 +2,8 @@
 
 {% load static %}
 
+{% load custom_filters %}
+
 {% block title %}
     Denuncias Tabla
 {% endblock %}
@@ -12,31 +14,93 @@
 
 <div class="container-fluid p-0">
 
+    <!-- Paginación -->
+    <nav aria-label="Page navigation" class="my-4">
+        <ul class="pagination justify-content-center">
+          {% if is_paginated %}
+            <!-- Botón de Página Anterior -->
+            {% if page_obj.has_previous %}
+            <li class="page-item">
+              <a class="page-link" href="?page=1" aria-label="Primera">
+                Primera
+              </a>
+            </li>
+            <li class="page-item">
+              <a class="page-link" href="?page={{ page_obj.previous_page_number }}" aria-label="Anterior">
+                Anterior
+              </a>
+            </li>
+            {% else %}
+            <li class="page-item disabled">
+              <span class="page-link">Primera</span>
+            </li>
+            <li class="page-item disabled">
+              <span class="page-link">Anterior</span>
+            </li>
+            {% endif %}
+  
+            <!-- Números de página -->
+            {% for num in page_obj.paginator.page_range %}
+              {% if page_obj.number == num %}
+              <li class="page-item active">
+                <span class="page-link">{{ num }}</span>
+              </li>
+              {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+              <li class="page-item">
+                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+              </li>
+              {% endif %}
+            {% endfor %}
+  
+            <!-- Botón de Página Siguiente -->
+            {% if page_obj.has_next %}
+            <li class="page-item">
+              <a class="page-link" href="?page={{ page_obj.next_page_number }}" aria-label="Siguiente">
+                Siguiente
+              </a>
+            </li>
+            <li class="page-item">
+              <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}" aria-label="Última">
+                Última
+              </a>
+            </li>
+            {% else %}
+            <li class="page-item disabled">
+              <span class="page-link">Siguiente</span>
+            </li>
+            <li class="page-item disabled">
+              <span class="page-link">Última</span>
+            </li>
+            {% endif %}
+          {% endif %}
+        </ul>
+      </nav>
+
     <!-- Main Content with Scrollable Table-->
-    <div class="table-responsive">
         <div class="table-responsive">
             <table class="table table-bordered table-striped">
                 <thead class="table-dark bg-primary">
                     <tr>
-                        <th>Acción</th>
-                        <th>¿Que relación tienes con la empresa?</th>
-                        <th>Ciudad en la que ocurrieron los hechos</th>
-                        <th>Unidad de Negocio en donde ocurrieron los hechos</th>
-                        <th>Lugar en que ocurrieron los hechos</th>
-                        <th>Fecha y Hora Aproximada</th>
-                        <th>Nombre de Implicados</th>
-                        <th>¿Cómo clasificarías el reporte?</th>
-                        <th>Descripción Detallada de la Denuncia</th>
-                        <th>Archivos adjuntos</th>
-                        <th>Nombre</th>
-                        <th>Email</th>
-                        <th>Teléfono</th>
-                        <th>Canal</th>
-                        <th>Prioridad</th>
-                        <th>Estatus</th>
-                        <th>Encargado</th>
-                        <th>Fecha de Registro</th>
-                        <th>Fecha de Cierre</th>
+                        <th class="text-center">Acción</th>
+                        <th class="text-center">ID</th>
+                        <th class="text-center">¿Que relación tienes con la empresa?</th>
+                        <th class="text-center">Ciudad en la que ocurrieron los hechos</th>
+                        <th class="text-center">Unidad de Negocio en donde ocurrieron los hechos</th>
+                        <th class="text-center">Lugar en que ocurrieron los hechos</th>
+                        <th class="text-center">Fecha y Hora Aproximada</th>
+                        <th class="text-center">Nombre de Implicados</th>
+                        <th class="text-center">¿Cómo clasificarías el reporte?</th>
+                        <th class="text-center">Descripción Detallada de la Denuncia</th>
+                        <th class="text-center">Archivos adjuntos</th>
+                        <th class="text-center">Nombre</th>
+                        <th class="text-center">Correos</th>
+                        <th class="text-center">Teléfonos</th>
+                        <th class="text-center">Canal</th>
+                        <th class="text-center">Prioridad</th>
+                        <th class="text-center">Estatus</th>
+                        <th class="text-center">Encargado</th>
+                        <th class="text-center">Fecha de Registro</th>
+                        <th class="text-center">Fecha de Cierre</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -47,25 +111,45 @@
                                     Modificar
                                 </button>
                             </td>
+                            <td>
+                                {{complaint.id}}
+                            </td>
                             <td>{{complaint.relation_id.relation|default_if_none:''}}</td>
                             <td>{{complaint.city_id.city|default_if_none:''}}</td>
                             <td>{{complaint.decrypted_business_unit|default_if_none:''}}</td>
                             <td>{{complaint.decrypted_place|default_if_none:''}}</td>
-                            <td>{{complaint.created_at|date:"d/m/Y"}}</td>
+                            <td>{{complaint.date_time|date:"d/m/Y - h:i A"}}</td>
                             <td>{{complaint.decrypted_names_involved|default_if_none:''}}</td>
                             <td>{{complaint.classification_id.classification}}</td>
                             <td>{{complaint.decrypted_detailed_description|default_if_none:''}}</td>
-                            <td></td>
+                            <td>
+                                {% for file in complaint.files.all %}
+                                    <a href="{{ file.file.url }}" target="_blank">{{ file.file.name|basename }}</a><br>
+                                {% empty %}
+                                    No hay archivos adjuntos
+                                {% endfor %}
+                            </td>
                             <td>{{complaint.decrypted_name|default_if_none:''}}</td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
+                            <td>
+                                {% for email in complaint.emails.all %}
+                                    {{ email.email }}<br>
+                                {% empty %}
+                                    No hay correos electrónicos
+                                {% endfor %}
+                            </td>
+                            <td>
+                                {% for phone in complaint.phones.all %}
+                                    {{ phone.phone_number }}<br>
+                                {% empty %}
+                                    No hay teléfonos registrados
+                                {% endfor %}
+                            </td>
+                            <td>{{complaint.channel_id.channel}}</td>
+                            <td>{{complaint.priority_id.priority}}</td>
+                            <td>{{complaint.status_id.status}}</td>
+                            <td>{{complaint.user_id|default_if_none:''}}</td>
+                            <td>{{complaint.created_at|date:"d/m/Y - h:i A"}}</td>
+                            <td>{{complaint.close_date|date:"d/m/Y - h:i A"}}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -73,8 +157,6 @@
             </div> 
         </div>
     </div>
-
-</div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/dragula/3.7.3/dragula.min.js"></script>
 <script src="{% static 'js/home_kanban_staff.js' %}"></script>

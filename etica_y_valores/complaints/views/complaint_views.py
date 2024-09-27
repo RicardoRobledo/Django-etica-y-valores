@@ -1,18 +1,20 @@
 import json
 
-from django.views.generic import ListView
+from datetime import datetime
 from http import HTTPStatus
 
+from django.utils import timezone
+from django.views.generic import ListView
 from django.views import View
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
+from django.core.exceptions import ValidationError
 from django.db.models import Count, F
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods
 from django.utils.dateparse import parse_date, parse_time
 from django.utils import timezone
-
 from django.urls import reverse
 from django.views.decorators.http import require_GET
 from django.conf import settings
@@ -81,6 +83,31 @@ def delete_complaint(request, code):
         status_id=StatusCategoryModel.objects.get(status='Desestimados'))
 
     return JsonResponse({'msg': 'complaint not proceeded'}, status=HTTPStatus.OK)
+
+
+@login_required
+@require_http_methods(["PUT"])
+def close_complaint(request, code):
+    """
+    This view closes a complaint
+    """
+
+    complaint = ComplaintModel.objects.filter(id=code)
+
+    if not complaint.exists():
+        return JsonResponse({'msg': 'complaint not found'}, status=HTTPStatus.NOT_FOUND)
+
+    status = StatusCategoryModel.objects.filter(status='Resolución')
+
+    if not status.exists():
+        return JsonResponse({'msg': 'status not found'}, status=HTTPStatus.NOT_FOUND)
+
+    complaint.update(
+        status_id=status.first(),
+        close_date=timezone.now()
+    )
+
+    return JsonResponse({'msg': 'complaint closed'}, status=HTTPStatus.OK)
 
 
 @login_required
@@ -294,7 +321,6 @@ def complaints_count(request):
     return response
 
 
-@login_required
 @require_http_methods(["POST"])
 def create_complaint(request):
     """
@@ -305,8 +331,7 @@ def create_complaint(request):
     city = request.POST.get('city')
     business_unit = request.POST.get('business_unit')
     place = request.POST.get('place')
-    date = request.POST.get('date')
-    time = request.POST.get('time')
+    date_time = request.POST.get('date_time')
     names_involved = request.POST.get('names_involved')
     report_classification = request.POST.get('report_classification')
     detailed_description = request.POST.get('detailed_description')
@@ -320,18 +345,23 @@ def create_complaint(request):
 
     # --------------- Validations ----------------
 
-    if not all([enterprise_relation, date, time, names_involved, report_classification,
+    if not all([enterprise_relation, date_time, names_involved, report_classification,
                 detailed_description, place, business_unit, city, communication_channel]):
         return JsonResponse(data={"msg": "There are empty required fields"}, status=HTTPStatus.BAD_REQUEST)
 
-    date = parse_date(date)
+    try:
+        # Become the string into a datetime object
+        date_time = datetime.strptime(date_time, '%Y-%m-%dT%H:%M')
 
-    if date > timezone.now().date():
-        return JsonResponse(data={"msg": "Date can't be in the future"}, status=HTTPStatus.BAD_REQUEST)
+        # Validate that the date and time are not in the future
+        if date_time > datetime.now():
+            raise ValidationError(
+                'Date and time cannot be in the future')
 
-    time = parse_time(time)
-    if time is None:
-        return JsonResponse(data={"msg": "Invalid time"}, status=HTTPStatus.BAD_REQUEST)
+    except ValueError:
+        return JsonResponse(data={"msg": "Invalid date format"}, status=HTTPStatus.BAD_REQUEST)
+    except ValidationError as e:
+        return JsonResponse(data={"msg": str(e)}, status=HTTPStatus.BAD_REQUEST)
 
     city = CityCategoryModel.objects.filter(city=city)
 
@@ -372,8 +402,7 @@ def create_complaint(request):
     complaint = ComplaintModel.objects.create(
         business_unit=business_unit,
         place=place,
-        date=date,
-        time=time,
+        date_time=timezone.make_aware(date_time),
         names_involved=names_involved,
         detailed_description=detailed_description,
         name=name,

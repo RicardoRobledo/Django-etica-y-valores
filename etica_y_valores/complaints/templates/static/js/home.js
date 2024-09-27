@@ -58,8 +58,7 @@ $('#send-complaint').on('click', async function(event){
     const city = $('#city');
     const business_unit = $('#business-unit');
     const location = $('#location');
-    const date = $('#date');
-    const time = $('#time');
+    const date_time = $('#date-time');
     const implicated = $('#implicated');
     const classification = $('#classification');
     const description = $('#description');
@@ -94,7 +93,7 @@ $('#send-complaint').on('click', async function(event){
 
     }
 
-    showFeedbackEmptyFields([relation, city, business_unit, location, date, time, implicated, classification, description, source]);
+    showFeedbackEmptyFields([relation, city, business_unit, location, date_time, implicated, classification, description, source]);
 
     // Iterar sobre todos los inputs de tipo file en el contenedor
     if(fileFields.length>1){
@@ -158,10 +157,15 @@ $('#send-complaint').on('click', async function(event){
         });
     }else{
         emailFields.each(function(index, element) {
-            $(element).removeClass('is-invalid');
 
-            if ($(element).val()!==''){
-                emails.push($(element).val());
+            const emailValue = $(element).val();
+
+            if (!emailPattern.test(emailValue)  && $(element).val()!==''){
+                invalidEmails = true;
+                $(element).addClass('is-invalid');
+            }else{
+                $(element).removeClass('is-invalid');
+                emails.push(emailValue);
             }
 
         });
@@ -251,8 +255,7 @@ $('#send-complaint').on('click', async function(event){
     formData.append('city', city.val());
     formData.append('business_unit', business_unit.val());
     formData.append('place', location.val());
-    formData.append('date', date.val());
-    formData.append('time', time.val());
+    formData.append('date_time', date_time.val());
     formData.append('names_involved', implicated.val());
     formData.append('report_classification', classification.val());
     formData.append('detailed_description', description.val());
@@ -271,7 +274,7 @@ $('#send-complaint').on('click', async function(event){
         }).then(response => {
             if (response.status===201) {
                 return response.json();
-            } 
+            }
         }).then(data=>{
             console.log(data);
             window.location.href = data['url'];
