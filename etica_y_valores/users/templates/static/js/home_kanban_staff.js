@@ -1,5 +1,5 @@
-const base_url = 'https://django-etica-y-valores.onrender.com';
-//const url = 'http://127.0.0.1:8000';
+//const base_url = 'https://django-etica-y-valores.onrender.com';
+const base_url = 'http://127.0.0.1:8000';
 
 const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
@@ -69,7 +69,7 @@ async function updateComplaintPriority(el, code, newPriority) {
         'Baja': '4'
     };
 
-    await fetch(`${url}/complaint/complaint_priority/${code}/`, {
+    await fetch(`${base_url}/complaint/complaint_priority/${code}/`, {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json', // Change to JSON
@@ -99,7 +99,7 @@ async function updateComplaintPriority(el, code, newPriority) {
 
 async function closeComplaint(id){
 
-    await fetch(`${url}/close_complaint/${id}/`, {
+    await fetch(`${base_url}/close_complaint/${id}/`, {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json',
@@ -117,7 +117,7 @@ function notProceedComplaint(code){
 
 async function notProceedComplaintModal(code) {
 
-    await fetch(`${url}/complaint/${code}/`, {
+    await fetch(`${base_url}/complaint/${code}/`, {
         method: 'DELETE',
         headers: {
             'Content-Type': 'application/json',

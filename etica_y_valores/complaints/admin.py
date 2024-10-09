@@ -17,12 +17,27 @@ from .models import (
 )
 
 
+from django.utils.html import format_html
+from django.urls import reverse
+
+
 class FileInline(admin.TabularInline):
     model = FileModel
     extra = 0
     max_num = 0
     can_delete = False
-    readonly_fields = ['file']
+    readonly_fields = ['file', 'decrypted_file']
+
+    def decrypted_file(self, obj):
+        """
+        Muestra un enlace para descargar el archivo desencriptado.
+        """
+
+        if obj.id:
+            url = reverse('app_complaints:view_pdf', args=[obj.id])
+            return format_html('<a href="{}" target="_blank">PDF</a>', url)
+
+    decrypted_file.short_description = "Ver PDF"
 
 
 class EmailInline(admin.TabularInline):
@@ -66,7 +81,16 @@ class PhoneAdmin(admin.ModelAdmin):
 
 class FileAdmin(admin.ModelAdmin):
 
-    pass
+    list_display = ('id', 'view_pdf_link',)
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def view_pdf_link(self, obj):
+        url = reverse('app_complaints:view_pdf', args=[obj.id])
+        return format_html('<a href="{}" target="_blank">{}</a>', url, obj.file.name)
+
+    view_pdf_link.short_description = 'PDF'
 
 
 admin.site.register(EmailModel, EmailAdmin)

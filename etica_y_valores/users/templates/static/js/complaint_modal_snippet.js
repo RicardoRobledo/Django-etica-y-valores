@@ -10,14 +10,11 @@ let phonesQuantity = 0;
 let emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.(com|org|net|edu|gov|mil|int)$/;
 let phonePattern = /^[0-9]{10}$/;
 
-//const base_url = 'https://django-etica-y-valores.onrender.com';
-const base_url = 'http://127.0.0.1:8000';
-const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-
-
 $(document).ready(function() {
     $('body').css('display', 'none');
     $('body').fadeIn(1000);
+
+    $('#modalComplaint .modal-body .container').hide();
 });
 
 
@@ -51,7 +48,7 @@ $('#search-complaint').on('click', async function(event){
 
 });
 
-$('#send-complaint').on('click', async function(event){
+$('#btn-update-complaint').on('click', async function(event){
     event.preventDefault();
 
     const relation = $('#relation');
@@ -67,6 +64,7 @@ $('#send-complaint').on('click', async function(event){
     const phoneContainer = $('#phones-container .d-flex');
     const source = $('#source');
     const name = $('#name');
+    const status = $('#status');
 
     let files = []; // Array para almacenar los archivos
     let emails = []; // Array para almacenar los correos
@@ -226,17 +224,14 @@ $('#send-complaint').on('click', async function(event){
 
     if(files[0]!==undefined){
         files.forEach((file, index) => {
-            console.log(file);
             formData.append('files', file); 
         });
     }
 
-    if(emails.length!==0){
+    if(emails[0]!==''){
         emails.forEach((email, index) => {
             formData.append('emails', email); 
         });
-    }else{
-        formData.append('emails', '');
     }
 
     phoneNumbers.forEach((phoneNumber, index) => {
@@ -247,11 +242,9 @@ $('#send-complaint').on('click', async function(event){
         phoneTypes.forEach((phoneType, index) => {
             formData.append('phone_types', phoneType); 
         });
-    }else{
-        formData.append('phone_types', ''); 
     }
 
-    formData.append('enterprise_relation', relation.val());
+    formData.append('relation', relation.val());
     formData.append('city', city.val());
     formData.append('business_unit', business_unit.val());
     formData.append('place', location.val());
@@ -261,11 +254,14 @@ $('#send-complaint').on('click', async function(event){
     formData.append('detailed_description', description.val());
     formData.append('name', name.val());
     formData.append('communication_channel', source.val());
+    formData.append('status', status.val());
 
     if(!invalidEmails && !invalidInputs && !invalidPhones && !invalidFiles){
 
-        const response = await fetch(base_url+'/complaint/', {
-            method: 'POST',
+        const code = $('#complaint-information label').attr('id');
+
+        const response = await fetch(`${base_url}/complaint/update_complaint/${code}/`, {
+            method: 'PUT',
             mode: 'same-origin',
             headers: {
               'X-CSRFToken': csrftoken
@@ -277,7 +273,6 @@ $('#send-complaint').on('click', async function(event){
             }
         }).then(data=>{
             console.log(data);
-            window.location.href = data['url'];
         });
 
     }
@@ -407,16 +402,115 @@ $('#add-phone').on('click', function(event){
         $('#phones-container').append(`
             <div class="d-flex my-2" id="phone-container-${phoneId}">
                 <select id="phone_type" class="form-select me-2 rounded-0" name="phone_type">
-                    <option value="celular">Celular</option>
-                    <option value="casa">Casa</option>
-                    <option value="oficina">Oficina</option>
-                    <option value="otro">Otro</option>
+                    <option value="Celular">Celular</option>
+                    <option value="Casa">Casa</option>
+                    <option value="Oficina">Oficina</option>
+                    <option value="Otro">Otro</option>
                 </select>
                 <input type="tel" id="phone" class="form-control rounded-0" placeholder="Teléfono" name="phone" pattern="^[0-9]{10}$" minlength="10" maxlength="10">
                 <button type="button" class="btn btn-secondary px-2 rounded-0 remove-element" onclick="removePhone('phone-container-${phoneId++}')">x</button>
             </div>`);
     }
     phonesQuantity++;
+});
+
+$('#btn-comments').on('click', async function(event){
+
+    const code = $('#complaint-information label').attr('id');
+    $('#offcanvasComplaintComments .offcanvas-body .loader-wrapper').show();
+
+    const response = await fetch(`${base_url}/complaint/comments/${code}`, {
+        method: 'GET',
+        headers: {
+            'X-CSRFToken': csrftoken,
+            'Content-Type': 'application/json',
+        },
+    }).then(response => {
+        return response.json();
+    }).catch(error => console.error(error));
+
+    $('#offcanvasComplaintComments .offcanvas-body .complaint-comment-list').empty();
+    $('#offcanvasComplaintComments .offcanvas-body .loader-wrapper').hide();
+
+    if(response['comments'].length === 0){
+        $('#offcanvasComplaintComments .offcanvas-body .complaint-comment-list').append(`<h6 class="text-center mb-0">No hay comentarios</h6>`);
+    }else{
+        response['comments'].forEach(comment => {
+            $('#offcanvasComplaintComments .offcanvas-body .complaint-comment-list').append(`
+                <div class="card column mb-3 rounded-0">
+                  <div class="card-header bg-danger text-white rounded-0">
+                    <h6 class="mb-0">Fecha: ${comment['date']}</h6>
+                  </div>
+                  <div class="card-body">
+                    ${comment['comment']}
+                  </div>
+                  <div class="card-footer">
+                    Escrito por: <i>${comment['user']}</i>
+                  </div>
+                </div>`);
+            });
+    }
+
+});
+
+$('#btn-logs').on('click', async function(event){
+
+    const code = $('#complaint-information label').attr('id');
+    $('#offcanvasComplaintLogs .offcanvas-body .loader-wrapper').show();
+
+    const response = await fetch(`${base_url}/complaint/logs/${code}`, {
+        method: 'GET',
+        headers: {
+            'X-CSRFToken': csrftoken,
+            'Content-Type': 'application/json',
+        },
+    }).then(response => {
+        return response.json();
+    }).catch(error => console.error(error));
+
+    $('#offcanvasComplaintLogs .offcanvas-body .complaint-log-list').empty();
+    $('#offcanvasComplaintLogs .offcanvas-body .loader-wrapper').hide();
+
+    if(response['logs'].length === 0){
+        $('#offcanvasComplaintLogs .offcanvas-body .complaint-log-list').append(`<h6 class="text-center mb-0">No hay comentarios</h6>`);
+    }else{
+        response['logs'].forEach(log => {
+            $('#offcanvasComplaintLogs .offcanvas-body .complaint-log-list').append(`
+                <div class="card column mb-3 rounded-0">
+                  <div class="card-header bg-warning text-white rounded-0">
+                    <h6 class="mb-0">Fecha: ${log['date']}</h6>
+                  </div>
+                  <div class="card-body">
+                    <p class="">${log['movement']}</p>
+                  </div>
+                </div>`);
+            });
+    }
+
+});
+
+$('#btn-send-comment').on('click', async function(event){
+
+    const code = $('#complaint-information label').attr('id');
+    const comment = $('#comment-text-area').val();
+
+    const response = await fetch(`${base_url}/complaint/comment/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': csrftoken
+        },
+        body: new URLSearchParams({
+            code,
+            comment
+        })
+    }).then(response => {
+        return response.json();
+    }).catch(error => console.error(error));
+
+    $('#offcanvasComplaintNewComment .btn-close').click();
+    $('#btn-comments').click();
+
 });
 
 
@@ -435,4 +529,95 @@ function removeEmail(id){
 function removePhone(id){
     $(`#${id}`).remove();
     phonesQuantity--;
+}
+
+async function complaintDetail(id){
+
+    $('#old-files-container ul').empty();
+    $('#old-emails-container ul').empty();
+    $('#old-phones-container ul').empty();
+    $('#assigned-user').empty();
+    $('#assigned-user').append(`<option value="">Selecciona un usuario</option>`);
+
+    const complaintResponse = await fetch(`${base_url}/complaint/${id}/`, {
+    }).then(response => {
+        return response.json()
+    }).then(data => {
+        return data;
+    });
+
+    const usersResponse = await fetch(`${base_url}/users/staff/users/`, {
+    }).then(response => {
+        return response.json()
+    }).then(data => {
+        return data;
+    });
+
+    const complaint = complaintResponse['complaint'];
+    const files = complaintResponse['files'];
+    const emails = complaintResponse['emails'];
+    const phones = complaintResponse['phones'];
+    const users = usersResponse['users'];
+
+    $('#modalComplaint .modal-body .container').show();
+    $('#modalComplaint .modal-body .loader-wrapper').hide();
+
+    $('#modalComplaint .modal-body #complaint-information').html(`<label id=${complaint['id']}>${complaint['id']}</label>`);
+    $('#modalComplaint .modal-body #complaint-information label').attr('id', complaint['id']);
+
+    $('#modalComplaint .modal-body #business-unit').val(complaint['business_unit']);
+    $('#modalComplaint .modal-body #location').val(complaint['place']);
+    $('#modalComplaint .modal-body #date-time').val(complaint['date_time']);
+    $('#modalComplaint .modal-body #close_date').val(complaint['close_date']);
+    $('#modalComplaint .modal-body #implicated').val(complaint['names_involved']);
+    $('#modalComplaint .modal-body #description').val(complaint['detailed_description']);
+    $('#modalComplaint .modal-body #name').val(complaint['name']);
+    $('#modalComplaint .modal-body #classification').val(complaint['classification']);
+    $('#modalComplaint .modal-body #relation').val(complaint['relation']);
+    $('#modalComplaint .modal-body #city').val(complaint['city']);
+    $('#modalComplaint .modal-body #channel').val(complaint['channel']);
+    $('#modalComplaint .modal-body #priority').val(complaint['priority']);
+    $('#modalComplaint .modal-body #status').val(complaint['status']);
+    $('#modalComplaint .modal-body #enterprise').val(complaint['enterprise']);
+    $('#modalComplaint .modal-body #source').val(complaint['channel']);
+    $('#modalComplaint .modal-body #complaint-created-at').html(`<label>Fecha recibida: ${complaint['created_at']}</label>`);
+
+    files.forEach(file => {
+        $('#old-files-container ul').append(`
+            <li>
+            <div class="mb-2 d-flex align-items-start" id="old-file-container-${fileId}">
+                <a href="${file['file_url']}" target="_blank" class="me-2" style="text-decoration: underline;">${file['file_name']}</a>
+            </div>
+            </li>`);
+    });
+
+    emails.forEach(email => {
+        $('#old-emails-container ul').append(`
+            <li>
+            <div class="mb-2 d-flex align-items-start" id="old-email-container-${emailId}">
+                <label class="me-2" style="text-decoration: underline;">${email['email']}</label>
+            </div>
+            </li>`);
+    });
+
+    phones.forEach(phone => {
+        $('#old-phones-container ul').append(`
+            <li>
+            <div class="d-flex my-2" id="old-phone-container-${phoneId}">
+                <label class="me-2" style="text-decoration: underline;">${phone['phone_type']}</label>
+                <label class="me-2" style="text-decoration: underline;">${phone['phone_number']}</label>
+            </div>
+            </li>`);
+    });
+
+    users.forEach(user => {
+        $('#assigned-user').append(`
+            <option value="${user['id']}">${user['username']}</option>
+        `);
+    });
+
+    if(complaint['assigned_user']!==''){
+        $('#assigned-user').val(complaint['assigned_user']['id']);
+    }
+
 }

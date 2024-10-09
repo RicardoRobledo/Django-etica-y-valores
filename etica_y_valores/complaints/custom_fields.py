@@ -4,7 +4,7 @@ import base64
 from django.db import models
 from django.conf import settings
 
-from cryptography.fernet import Fernet
+from etica_y_valores.base.utils.encrypt_handlers import cipher_suite
 
 
 class UUIDPrimaryKeyField(models.Field):
@@ -50,8 +50,7 @@ class UUIDPrimaryKeyField(models.Field):
 class EncryptedField(models.TextField):
 
     def __init__(self, *args, **kwargs):
-        self.cipher_suite = Fernet(base64.urlsafe_b64encode(
-            settings.SECRET_KEY_FOR_CIPHER.encode()))
+        self.cipher_suite = cipher_suite
         super().__init__(*args, **kwargs)
 
     def get_prep_value(self, value):

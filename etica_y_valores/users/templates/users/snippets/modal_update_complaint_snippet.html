@@ -11,6 +11,12 @@
         </div>
         
         <div class="modal-body">
+
+            <div class="loader-wrapper m-5">
+                <div class="loader"></div>
+                <p class="mt-4">Espera un momento...</p>
+            </div>
+
             <div class="container">
         
                 <!-- Modal -->
@@ -27,10 +33,14 @@
                     </div>
                   </div>
                 </div>
+
+                <form class="needs-validation rounded-0 form-container" method="post" enctype="multipart/form-data" novalidate>
+                    {% csrf_token %}
                   
                 <div class="container my-4">
-                    <form class="needs-validation rounded-0 form-container" method="post" enctype="multipart/form-data" novalidate>
-                        {% csrf_token %}
+
+                    <h5 class="mb-5" id="complaint-information"></h5>
+                    
                         <div class="row">
                             <!-- Primera Sección -->
                             <div class="col-lg-6">
@@ -74,10 +84,8 @@
         
                                 <div class="mb-5">
                                     <label for="date-time" class="form-label">Fecha y Hora Aproximada</label>
-                                    <div class="d-flex">
-                                        <input type="date" id="date" class="form-control me-2 rounded-0" name="date" required>
-                                        <input type="time" id="time" class="form-control rounded-0" name="time" required>
-                                    </div>
+                                    <input type="datetime-local" id="date-time" class="form-control rounded-0" name="date-time" required>
+                                    <div class="invalid-feedback">Por favor, ingresa la fecha y hora.</div>
                                 </div>
         
                                 <div class="mb-5">
@@ -86,7 +94,7 @@
                                     <div class="invalid-feedback">Por favor, ingresa los nombres de los implicados.</div>
                                 </div>
         
-                                <div>
+                                <div class="mb-5">
                                     <label for="classification" class="form-label">¿Cómo clasificarías el reporte?</label>
                                     <select id="classification" class="form-select rounded-0" name="classification" required>
                                         <option value="">Selecciona una opción</option>
@@ -100,23 +108,21 @@
                                     </select>
                                     <div class="invalid-feedback">Por favor, selecciona una clasificación para el reporte.</div>
                                 </div>
-        
-                                <div class="my-5">
-                                    <label for="description" class="form-label">Descripción Detallada de la Denuncia</label>
-                                    <textarea id="description" class="form-control rounded-0" rows="4" placeholder="Describe los detalles de la denuncia (1500 caracteres como máximo)" name="description" maxlength="6500" required></textarea>
-                                    <div class="invalid-feedback">Por favor, ingresa la descripción detallada.</div>
-                                </div>
                             </div>
         
                             <!-- Segunda Sección -->
                             <div class="col-lg-6">
-                                <div class="mb-5" id="file-container">
-                                    <label for="files" class="form-label">Datos adjuntos</label>
-                                    <div id="files-container">
-                                        <input type="file" id="files" class="form-control mb-2 rounded-0" name="files">
+                                <div class="mb-5">
+                                    <label for="description" class="form-label">Descripción Detallada de la Denuncia</label>
+                                    <textarea id="description" class="form-control rounded-0" rows="4" placeholder="Describe los detalles de la denuncia (1500 caracteres como máximo)" name="description" maxlength="6500" required></textarea>
+                                    <div class="invalid-feedback">Por favor, ingresa la descripción detallada.</div>
+                                </div>
+
+                                <div class="mb-5" id="old-file-container">
+                                    <label for="files" class="form-label">Datos adjuntos proporcionados</label>
+                                    <div id="old-files-container">
+                                        <ul></ul>
                                     </div>
-                                    <div class="invalid-feedback">Por favor, revisa que los campos de los archivos estén en formato jpg, png o pdf y no estén vacíos si es que agregas 2 o más documentos. Agregar archivos es opcional</div>
-                                    <button type="button" class="btn btn-secondary mt-2 rounded-0" id="add-file">Agregar otro archivo</button>
                                 </div>
         
                                 <div class="mb-5">
@@ -124,30 +130,19 @@
                                     <input type="text" id="name" class="form-control rounded-0" placeholder="Nombre (Opcional)" name="name" pattern="^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$">
                                 </div>
         
-                                <div class="mb-5" id="email-container">
-                                    <label for="email" class="form-label">¿Quieres ser contactado? Deja tu email</label>
-                                    <div id="emails-container">
-                                        <input type="email" id="email" class="form-control mb-2 rounded-0" placeholder="Correo (Opcional)" name="email">
+                                <div class="mb-5" id="old-email-container">
+                                    <label for="email" class="form-label">Emails proporcionados</label>
+                                    <div id="old-emails-container">
+                                        <ul></ul>
                                     </div>
-                                    <div class="invalid-feedback">Por favor, revisa que los correos estén bien escritos</div>
-                                    <button type="button" class="btn btn-secondary mt-2 rounded-0" id="add-email">Agregar otro correo</button>
                                 </div>
         
-                                <div class="mb-5" id="phone-container">
-                                    <label for="phone" class="form-label">¿Quieres dejar algún teléfono?</label>
-                                    <div id="phones-container">
-                                        <div class="d-flex mb-2">
-                                            <select id="phone_type" class="form-select me-2 rounded-0" name="phone_type">
-                                                <option value="Celular">Celular</option>
-                                                <option value="Casa">Casa</option>
-                                                <option value="Oficina">Oficina</option>
-                                                <option value="Otro">Otro</option>
-                                            </select>
-                                            <input type="tel" id="phone" class="form-control rounded-0" placeholder="Teléfono (Opcional)" name="phone" pattern="^[0-9]{10}$" minlength="10" maxlength="10">
-                                        </div>
+                                <div class="mb-5" id="old-phone-container">
+                                    <label for="phone" class="form-label">Teléfonos proporcionados</label>
+                                    <div id="old-phones-container">
+                                        <ul></ul>
                                     </div>
                                     <div class="invalid-feedback">Por favor, revisa que los números de teléfono estén bien escritos</div>
-                                    <button type="button" class="btn btn-secondary mt-2 rounded-0" id="add-phone">Agregar otro teléfono</button>
                                 </div>
         
                                 <div class="mb-5">
@@ -163,16 +158,122 @@
                                     </select>
                                     <div class="invalid-feedback">Por favor, selecciona el canal por el cual te enteraste.</div>
                                 </div>
-        
-                                <div class="d-grid">
-                                    <button id="send-complaint" type="submit" class="btn btn-secondary rounded-0">Enviar denuncia</button>
+
+                                <div class="mb-5">
+                                    <label for="status" class="form-label">Status</label>
+                                    <select id="status" class="form-select rounded-0" name="status" required>
+                                        <option value="">Selecciona una opción</option>
+                                        <option value="Pendiente de Asignar">Pendiente de Asignar</option>
+                                        <option value="Análisis">Análisis</option>
+                                        <option value="Investigación">Investigación</option>
+                                        <option value="Resolución">Resolución</option>
+                                        <option value="Desestimados">Desestimados</option>
+                                    </select>
                                 </div>
+
+                                <div class="mb-5" id="complaint-created-at"></div>
         
                             </div>
                         </div>
-                    </form>
+                </div>
+                <div class="container">
+                    <h5 class="my-4">Acciones</h5>
+
+                    <div class="mb-3" id="file-container">
+                        <label for="files" class="form-label">Agregar más datos adjuntos</label>
+                        <div id="files-container">
+                            <input type="file" id="files" class="form-control mb-2 rounded-0" name="files">
+                        </div>
+                        <div class="invalid-feedback">Por favor, revisa que los campos de los archivos estén en formato jpg, png o pdf y no estén vacíos si es que agregas 2 o más documentos. Agregar archivos es opcional</div>
+                        <button type="button" class="btn btn-secondary mt-2 rounded-0" id="add-file">Agregar otro archivo</button>
+                    </div>
+
+                    <div class="mb-3" id="email-container">
+                        <label for="email" class="form-label">Agregar más emails</label>
+                        <div id="emails-container">
+                            <input type="email" id="email" class="form-control mb-2 rounded-0" placeholder="Correo (Opcional)" name="email">
+                        </div>
+                        <div class="invalid-feedback">Por favor, revisa que los correos estén bien escritos</div>
+                        <button type="button" class="btn btn-secondary mt-2 rounded-0" id="add-email">Agregar otro correo</button>
+                    </div>
+
+                    <div class="mb-5" id="phone-container">
+                        <label for="phone" class="form-label">¿Quieres dejar algún teléfono?</label>
+                        <div id="phones-container">
+                            <div class="d-flex mb-2">
+                                <select id="phone_type" class="form-select me-2 rounded-0" name="phone_type">
+                                    <option value="Celular">Celular</option>
+                                    <option value="Casa">Casa</option>
+                                    <option value="Oficina">Oficina</option>
+                                    <option value="Otro">Otro</option>
+                                </select>
+                                <input type="tel" id="phone" class="form-control rounded-0" placeholder="Teléfono (Opcional)" name="phone" pattern="^[0-9]{10}$" minlength="10" maxlength="10">
+                            </div>
+                        </div>
+                        <div class="invalid-feedback">Por favor, revisa que los números de teléfono estén bien escritos</div>
+                        <button type="button" class="btn btn-secondary mt-2 rounded-0" id="add-phone">Agregar otro teléfono</button>
+                    </div>
+
+                    <div class="d-flex justify-content-center mb-5">
+                        <button class="btn btn-success" id="btn-comments" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasComplaintComments" aria-controls="offcanvasComplaintComments">
+                            Ver comentarios
+                        </button>
+                        <button class="btn btn-success mx-4" id="btn-logs" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasComplaintLogs" aria-controls="offcanvasComplaintLogs">
+                            Ver actividad
+                        </button>
+                        <button class="btn btn-success" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasComplaintNewComment" aria-controls="offcanvasExample">
+                            Agregar comentario
+                        </button>
+                    </div>
+                      
+                    <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasComplaintComments" aria-labelledby="offcanvasExampleLabel">
+                        <div class="offcanvas-header">
+                          <h5 class="offcanvas-title" id="offcanvasExampleLabel">Comentarios</h5>
+                          <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                        </div>
+                        <div class="offcanvas-body">
+                            <div class="loader-wrapper">
+                                <div class="loader"></div>
+                                <p class="mt-4">Espera un momento...</p>
+                            </div>
+                            <div class="complaint-comment-list"></div>
+                        </div>
+                    </div>
+
+                    <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasComplaintLogs" aria-labelledby="offcanvasExampleLabel">
+                        <div class="offcanvas-header">
+                          <h5 class="offcanvas-title" id="offcanvasExampleLabel">Actividad</h5>
+                          <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                        </div>
+                        <div class="offcanvas-body">
+                            <div class="loader-wrapper">
+                                <div class="loader"></div>
+                                <p class="mt-4">Espera un momento...</p>
+                            </div>
+                            <div class="complaint-log-list"></div>
+                        </div>
+                    </div>
+
+                    <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasComplaintNewComment" aria-labelledby="offcanvasExampleLabel">
+                        <div class="offcanvas-header">
+                          <h5 class="offcanvas-title" id="offcanvasExampleLabel">Nuevo comentario</h5>
+                          <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                        </div>
+                        <div class="offcanvas-body">
+                            <div class="form-floating d-flex flex-column">
+                                <textarea class="form-control" style="height: 300px" placeholder="Leave a comment here" id="comment-text-area"></textarea>
+                                <label for="floatingTextarea">Comment</label>
+                                <button type="button" class="btn btn-primary my-5" id="btn-send-comment">Send comment</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-grid mb-5">
+                        <button id="btn-update-complaint" class="btn btn-secondary rounded-0">Actualizar denuncia</button>
+                    </div>
                 </div>
             </div>
+            </form>
         </div>
       </div>
     </div>

@@ -7,7 +7,7 @@ from django.utils import timezone
 from django.views.generic import ListView
 from django.views import View
 from django.shortcuts import render
-from django.http import HttpResponse, JsonResponse
+from django.http import JsonResponse
 from django.core.exceptions import ValidationError
 from django.db.models import Count, F
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -18,6 +18,9 @@ from django.utils import timezone
 from django.urls import reverse
 from django.views.decorators.http import require_GET
 from django.conf import settings
+
+from django.core.files.uploadhandler import TemporaryFileUploadHandler
+from django.http.multipartparser import MultiPartParser
 
 from etica_y_valores.enterprises.models import EnterpriseModel
 from ..models import (
@@ -123,6 +126,21 @@ def complaints_count(request):
     # user level
     user_level = user.user_level_id.user_level
 
+    table_complaints_staff_path = reverse('app_users:table_complaints_staff')
+    home_staff_path = reverse('app_users:home_staff')
+    table_complaints_ended_staff_path = reverse(
+        'app_users:table_complaints_ended_staff')
+    status_staff_path = reverse(
+        'app_users:status_staff', args=['placeholder'])
+    city_staff_path = reverse(
+        'app_users:city_staff', args=['placeholder'])
+    priority_staff_path = reverse(
+        'app_users:priority_staff', args=['placeholder'])
+    classification_staff_path = reverse(
+        'app_users:classification_staff', args=['placeholder'])
+    channel_staff_path = reverse(
+        'app_users:channel_staff', args=['placeholder'])
+
     if user_level == 'Superusuario':
 
         # all complaints
@@ -184,6 +202,15 @@ def complaints_count(request):
             'all_complaints_by_priority': all_complaints_by_priority,
             'all_complaints_by_classification': all_complaints_by_classification,
             'all_complaints_by_channel': all_complaints_by_channel,
+            'home_staff_path': home_staff_path,
+            'table_complaints_staff_path': table_complaints_staff_path,
+            'table_complaints_ended_staff_path': table_complaints_ended_staff_path,
+            'status_staff_path': status_staff_path,
+            'city_staff_path': city_staff_path,
+            'priority_staff_path': priority_staff_path,
+            'classification_staff_path': classification_staff_path,
+            'channel_staff_path': channel_staff_path,
+            'list_user_staff_path': reverse('app_users:list_user_staff')
         }, status=HTTPStatus.OK)
 
     elif user_level == 'Supervisor':
@@ -247,12 +274,21 @@ def complaints_count(request):
             'all_complaints_by_priority': all_complaints_by_priority,
             'all_complaints_by_classification': all_complaints_by_classification,
             'all_complaints_by_channel': all_complaints_by_channel,
+            'home_staff_path': home_staff_path,
+            'table_complaints_staff_path': table_complaints_staff_path,
+            'table_complaints_ended_staff_path': table_complaints_ended_staff_path,
+            'status_staff_path': status_staff_path,
+            'city_staff_path': city_staff_path,
+            'priority_staff_path': priority_staff_path,
+            'classification_staff_path': classification_staff_path,
+            'channel_staff_path': channel_staff_path,
+            'list_user_staff_path': reverse('app_users:list_user_staff')
         }, status=HTTPStatus.OK)
 
     else:
 
         # all user groups (permissions)
-        user_permissions = get_grouped_user_permissions(user)
+        user_permissions = get_grouped_user_permissions(user, user_level)
 
         # all user complaints
         all_user_complaints = ComplaintModel.objects.filter(
@@ -316,6 +352,15 @@ def complaints_count(request):
             'all_complaints_by_priority': all_complaints_by_priority,
             'all_complaints_by_classification': all_complaints_by_classification,
             'all_complaints_by_channel': all_complaints_by_channel,
+            'home_staff_path': home_staff_path,
+            'table_complaints_staff_path': table_complaints_staff_path,
+            'table_complaints_ended_staff_path': table_complaints_ended_staff_path,
+            'status_staff_path': status_staff_path,
+            'city_staff_path': city_staff_path,
+            'priority_staff_path': priority_staff_path,
+            'classification_staff_path': classification_staff_path,
+            'channel_staff_path': channel_staff_path,
+            'list_user_staff_path': reverse('app_users:list_user_staff') if 'Usuario' in user_permissions['tasks'] else ''
         }, status=HTTPStatus.OK)
 
     return response
@@ -338,9 +383,9 @@ def create_complaint(request):
     name = request.POST.get('name')
     communication_channel = request.POST.get('communication_channel')
 
-    emails = request.POST.getlist('emails')
-    phone_numbers = request.POST.getlist('phone_numbers')
-    phone_types = request.POST.getlist('phone_types')
+    emails = request.POST.getlist('emails', '')
+    phone_numbers = request.POST.getlist('phone_numbers', '')
+    phone_types = request.POST.getlist('phone_types', '')
     files = request.FILES.getlist('files')
 
     # --------------- Validations ----------------
@@ -410,7 +455,6 @@ def create_complaint(request):
         relation_id=relation,
         city_id=city,
         channel_id=channel,
-        priority_id=PriorityCategoryModel.objects.get(priority='Sin asignar'),
         status_id=StatusCategoryModel.objects.get(
             status='Pendiente de Asignar'),
         enterprise_id=EnterpriseModel.objects.get(subdomain=request.get_host())
@@ -441,9 +485,172 @@ def create_complaint(request):
     )
 
     url = reverse('app_complaints:complaint_created', args=[complaint.id])
-    print(url)
 
     return JsonResponse(data={'url': url}, status=HTTPStatus.CREATED)
+
+
+@require_http_methods(["PUT"])
+def update_complaint(request, code):
+
+    request.upload_handlers = [TemporaryFileUploadHandler()]
+
+    parser = MultiPartParser(request.META, request,
+                             request.upload_handlers, request.encoding)
+    data, files = parser.parse()
+
+    # Ahora puedes acceder a los campos de formulario y archivos
+    relation = data.get('relation', '')
+    city = data.get('city', '')
+    business_unit = data.get('business_unit', '')
+    place = data.get('place', '')
+    date_time = data.get('date_time', '')
+    names_involved = data.get('names_involved', '')
+    classification = data.get('report_classification', '')
+    detailed_description = data.get('detailed_description', '')
+    name = data.get('name', '')
+    channel = data.get('communication_channel', '')
+    status = data.get('status', '')
+
+    emails = data.getlist('emails')
+    phone_numbers = data.getlist('phone_numbers')
+    phone_types = data.getlist('phone_types')
+    files = files.getlist('files')
+
+    # --------------- Validations ----------------
+
+    if not all([relation, date_time, names_involved, classification,
+                detailed_description, place, business_unit, city, channel]):
+        return JsonResponse(data={"msg": "There are empty required fields"}, status=HTTPStatus.BAD_REQUEST)
+
+    try:
+        # Become the string into a datetime object
+        date_time = datetime.strptime(date_time, '%Y-%m-%dT%H:%M')
+
+        # Validate that the date and time are not in the future
+        if date_time > datetime.now():
+            raise ValidationError(
+                'Date and time cannot be in the future')
+
+    except ValueError:
+        return JsonResponse(data={"msg": "Invalid date format"}, status=HTTPStatus.BAD_REQUEST)
+    except ValidationError as e:
+        return JsonResponse(data={"msg": str(e)}, status=HTTPStatus.BAD_REQUEST)
+
+    city = CityCategoryModel.objects.filter(city=city)
+
+    if not city.exists():
+        print('city not found')
+        return JsonResponse(data={"msg": "Nonexistent city"}, status=HTTPStatus.BAD_REQUEST)
+
+    classification = ClassificationCategoryModel.objects.filter(
+        classification=classification)
+
+    if not classification.exists():
+        print('classification not found')
+        return JsonResponse(data={"msg": "Nonexistent classification"}, status=HTTPStatus.BAD_REQUEST)
+
+    relation = RelationCategoryModel.objects.filter(
+        relation=relation)
+
+    if not relation.exists():
+        print('relation not found')
+        return JsonResponse(data={"msg": "Nonexistent relation"}, status=HTTPStatus.BAD_REQUEST)
+
+    channel = ChannelCategoryModel.objects.filter(
+        channel=channel)
+
+    if not channel.exists():
+        print('channel not found')
+        return JsonResponse(data={"msg": "Nonexistent channel"}, status=HTTPStatus.BAD_REQUEST)
+
+    phone_types_gotten = PhoneTypeCategoryModel.objects.filter(
+        phone_type__in=phone_types)
+
+    if phone_types_gotten.count() != len(phone_types):
+        print('phone type not found')
+        return JsonResponse(data={"msg": "Nonexistent phone type"}, status=HTTPStatus.BAD_REQUEST)
+
+    status = StatusCategoryModel.objects.filter(status=status)
+
+    if not status.exists():
+        print('status not found')
+        return JsonResponse(data={"msg": "Nonexistent status"}, status=HTTPStatus.BAD_REQUEST)
+
+    city = city.first()
+    relation = relation.first()
+    classification = classification.first()
+    channel = channel.first()
+    status = status.first()
+
+    # --------------- Updates ----------------
+
+    complaint = ComplaintModel.objects.filter(
+        id=code,
+        enterprise_id__subdomain=request.get_host()
+    )
+
+    if not complaint.exists():
+        print('complaint not found')
+        return JsonResponse(data={"msg": "Complaint not found"}, status=HTTPStatus.NOT_FOUND)
+
+    complaint.update(
+        business_unit=business_unit,
+        place=place,
+        date_time=timezone.make_aware(date_time),
+        names_involved=names_involved,
+        detailed_description=detailed_description,
+        name=name,
+        classification_id=classification,
+        relation_id=relation,
+        city_id=city,
+        channel_id=channel,
+        status_id=status,
+        enterprise_id=EnterpriseModel.objects.get(subdomain=request.get_host())
+    )
+
+    complaint = complaint.first()
+
+    LogModel.objects.create(
+        complaint_id=complaint,
+        movement='Se han actualizado los datos de la denuncia',
+    )
+
+    for email in emails:
+        EmailModel.objects.create(
+            email=email,
+            complaint_id=complaint,
+        )
+
+        LogModel.objects.create(
+            complaint_id=complaint,
+            movement='Se han agregado nuevos correos a la denuncia',
+        )
+
+    for phone_type, phone_number in zip(phone_types_gotten, phone_numbers):
+        PhoneModel.objects.create(
+            phone_type=phone_type,
+            phone_number=phone_number,
+            complaint_id=complaint,
+        )
+
+        LogModel.objects.create(
+            complaint_id=complaint,
+            movement='Se han agregado nuevos número de teléfono a la denuncia',
+        )
+
+    for file in files:
+        print(file)
+        FileModel.objects.create(
+            file=file,
+            complaint_id=complaint,
+        )
+
+        LogModel.objects.create(
+            complaint_id=complaint,
+            movement='Se han agregado nuevos archivos a la denuncia',
+        )
+
+    return JsonResponse(data={"msg": "Complaint updated successfully"}, status=200)
 
 
 @require_http_methods(["PUT"])
@@ -540,7 +747,8 @@ class CommentsView(View, LoginRequiredMixin):
         This method return our comments from a complaint
         """
 
-        complaint = ComplaintModel.objects.filter(id=code)
+        complaint = ComplaintModel.objects.filter(
+            id=code, enterprise_id__subdomain=request.get_host())
 
         if complaint.exists():
 
@@ -548,11 +756,13 @@ class CommentsView(View, LoginRequiredMixin):
                 'comments': []
             }
 
-            comments = CommentModel.objects.filter(complaint_id=code)
+            comments = CommentModel.objects.filter(
+                complaint_id=code).order_by('-created_at')
             data['comments'] = [
                 {
+                    'user': comment.user_id.username if comment.user_id else 'Anónimo',
                     'comment': comment.comment,
-                    'date': comment.created_at.strftime('%m-%d-%Y'),
+                    'date': timezone.localtime(comment.created_at).strftime('%d-%m-%Y'),
                 }
                 for comment in comments
             ]
@@ -560,3 +770,183 @@ class CommentsView(View, LoginRequiredMixin):
             return JsonResponse(data=data, status=HTTPStatus.FOUND)
 
         return JsonResponse(data={'msg': 'Complaint not found'}, status=HTTPStatus.NOT_FOUND)
+
+
+@login_required
+@require_http_methods(["POST"])
+def create_comment(request):
+    """
+    This view creates a comment
+    """
+
+    code = request.POST.get('code')
+    comment = request.POST.get('comment')
+
+    complaint = ComplaintModel.objects.filter(
+        enterprise_id__subdomain=request.get_host(),
+        id=code)
+
+    if not complaint.exists():
+        return JsonResponse(data={"msg": "Complaint not found"}, status=HTTPStatus.NOT_FOUND)
+
+    user = request.user
+    user_level = user.user_level_id.user_level
+
+    if user_level == 'Superusuario' or user_level == 'Supervisor':
+
+        CommentModel.objects.create(
+            complaint_id=complaint.first(),
+            user_id=user,
+            comment=comment
+        )
+
+        return JsonResponse(data={'msg': 'comment created'}, status=HTTPStatus.CREATED)
+
+    else:
+        user_permissions = get_grouped_user_permissions(user, user_level)
+
+        complaint = complaint.filter(
+            city_id__city__in=user_permissions['cities'],
+            priority_id__priority__in=user_permissions['priorities'],
+            status_id__status__in=user_permissions['statuses']
+        )
+
+        if not complaint.exists():
+            return JsonResponse(data={'msg': 'Without enough permissions to access to the complaint'}, status=HTTPStatus.FORBIDDEN)
+
+        if not 'Comentarios' in user_permissions['tasks']:
+            return JsonResponse(data={'msg': 'Without enough permissions to add comment'}, status=HTTPStatus.FORBIDDEN)
+
+        CommentModel.objects.create(
+            complaint_id=complaint.first(),
+            user_id=user,
+            comment=comment
+        )
+
+        return JsonResponse(data={'msg': 'Without enough permissions to add comment'}, status=HTTPStatus.FORBIDDEN)
+
+
+class LogsView(View, LoginRequiredMixin):
+
+    def get(self, request, code, *args, **kwargs):
+        """
+        This method return our logs from a complaint
+        """
+
+        complaint = ComplaintModel.objects.filter(
+            id=code, enterprise_id__subdomain=request.get_host())
+
+        if complaint.exists():
+
+            data = {
+                'logs': []
+            }
+
+            logs = LogModel.objects.filter(
+                complaint_id=complaint.first()).order_by('-created_at')
+
+            data['logs'] = [
+                {
+                    'movement': log.movement,
+                    'date': timezone.localtime(log.created_at).strftime('%d-%m-%Y'),
+                }
+                for log in logs
+            ]
+
+            return JsonResponse(data=data, status=HTTPStatus.FOUND)
+
+        return JsonResponse(data={'msg': 'Complaint not found'}, status=HTTPStatus.NOT_FOUND)
+
+
+class ComplaintView(View, LoginRequiredMixin):
+
+    def get_complaint_info(self, complaint):
+        """
+        This method returns the complaint info
+        """
+
+        files = [
+            {
+                'id': file_obj.id,
+                'file_name': file_obj.file.name.split('/')[-1],
+                'file_url': reverse('app_users:staff_view_pdf', args=[file_obj.id])
+            }
+            for file_obj in FileModel.objects.filter(complaint_id=complaint)
+        ]
+
+        emails = [
+            {
+                'id': email_obj.id,
+                'email': email_obj.email
+            }
+            for email_obj in EmailModel.objects.filter(complaint_id=complaint)
+        ]
+
+        phones = [
+            {
+                'id': phone_obj.id,
+                'phone_type': phone_obj.phone_type.phone_type,
+                'phone_number': phone_obj.phone_number
+            }
+            for phone_obj in PhoneModel.objects.filter(complaint_id=complaint)
+        ]
+
+        assigned_user = complaint.user_id
+
+        complaint_data = {
+            'files': files,
+            'emails': emails,
+            'phones': phones,
+            'complaint': {
+                'id': complaint.id,
+                'business_unit': complaint.decrypted_business_unit,
+                'place': complaint.decrypted_place,
+                'date_time': timezone.localtime(complaint.date_time).strftime('%Y-%m-%dT%H:%M'),
+                'close_date': timezone.localtime(complaint.close_date).strftime('%Y-%m-%dT%H:%M') if complaint.close_date else '',
+                'names_involved': complaint.decrypted_names_involved,
+                'detailed_description': complaint.decrypted_detailed_description,
+                'name': complaint.decrypted_name,
+                'classification': complaint.classification_id.classification,
+                'relation': complaint.relation_id.relation,
+                'city': complaint.city_id.city,
+                'channel': complaint.channel_id.channel,
+                'priority': complaint.priority_id.priority,
+                'status': complaint.status_id.status,
+                'enterprise': complaint.enterprise_id.enterprise_name,
+                'created_at': timezone.localtime(complaint.created_at).strftime('%d-%m-%Y'),
+                'assigned_user': {'id': assigned_user.id, 'username': assigned_user.username} if assigned_user else ''
+            }}
+
+        return complaint_data
+
+    def get(self, request, code, *args, **kwargs):
+        """
+        This method return a complaint
+        """
+
+        user = request.user
+        user_level = user.user_level_id.user_level
+
+        complaint = ComplaintModel.objects.filter(id=code)
+
+        if not complaint.exists():
+            return JsonResponse(data={'msg': 'Complaint not found'}, status=HTTPStatus.NOT_FOUND)
+
+        if user_level == 'Superusuario' or user_level == 'Supervisor':
+
+            return JsonResponse(data=self.get_complaint_info(complaint.first()), status=HTTPStatus.OK)
+
+        else:
+
+            user_permissions = get_grouped_user_permissions(user, user_level)
+
+            if not complaint.filter(
+                enterprise_id__subdomain=request.get_host(),
+                user_id__id=user.id,
+                city_id__city__in=user_permissions['cities'],
+                priority_id__priority__in=user_permissions['priorities'],
+                status_id__status__in=user_permissions['statuses']
+            ).exists():
+                return JsonResponse(data={'msg': 'without enough permissions to get complaint'}, status=HTTPStatus.FORBIDDEN)
+
+            return JsonResponse(data=self.get_complaint_info(complaint.first()), status=HTTPStatus.OK)

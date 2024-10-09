@@ -1,0 +1,148 @@
+<!-- Modal -->
+<div class="modal fade" id="modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="staticBackdropLabel">Agregar Usuario</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form class="needs-validation rounded-0 form-container" method="post" enctype="multipart/form-data" novalidate>
+                    {% csrf_token %}
+                    <div class="row">
+                        <!-- Primera Sección -->
+                        <div class="col-lg-6">
+                            <div class="mb-5">
+                                <label for="name" class="form-label">Nombre</label>
+                                <input type="text" id="name" class="form-control rounded-0" placeholder="Nombre" name="name" maxlength="30" pattern="^[a-zA-Z]+$" required>
+                                <div class="invalid-feedback">Por favor ingresa un nombre con solo letras.</div>
+                            </div>
+
+                            <div class="mb-5">
+                                <label for="last-name" class="form-label">Segundo apellido</label>
+                                <input type="text" id="last-name" class="form-control rounded-0" placeholder="Segundo apellido" name="last-name" maxlength="30" pattern="^[a-zA-Z]+(?:\s[a-zA-Z]+)*$" required>
+                                <div class="invalid-feedback">Por favor ingresa un apellido con solo letras y espacios</div>
+                            </div>
+
+                            <div class="mb-5">
+                                <label for="password" class="form-label">Contraseña</label>
+                                <input type="password" id="password" class="form-control rounded-0" placeholder="Contraseña" name="password" maxlength="30" pattern="^[a-zA-Z\s]+$" required>
+                                <div class="invalid-feedback">Por favor ingresa una contraseña.</div>
+                            </div>
+
+                            <div class="mb-5">
+                                <label for="user-level" class="form-label">Nivel de usuario</label>
+                                <select id="user-level" class="form-select rounded-0" name="user-level" required>
+                                    <option value="">Selecciona una opción</option>
+                                    <option value="Superusuario">Superusuario</option>
+                                    <option value="Supervisor">Supervisor</option>
+                                    <option value="Operador">Operador</option>
+                                </select>
+                                <div class="invalid-feedback">Por favor selecciona un nivel de usuario.</div>
+                            </div>
+
+                            <div class="mb-5">
+                                <label for="email" class="form-label">¿Quieres ser contactado? Deja tu email</label>
+                                    <input type="email" id="add-email" class="form-control mb-2 rounded-0" placeholder="Correo (Opcional)" name="email">
+                                <div class="invalid-feedback">Por favor, revisa que el correo no esté vacío y esté bien escrito</div>
+                            </div>
+                        </div>
+
+                        <!-- Segunda Sección -->
+                        <div class="col-lg-6">
+                            <div class="mb-5">
+                                <label for="middle-name" class="form-label">Primer apellido</label>
+                                <input type="text" id="middle-name" class="form-control rounded-0" placeholder="Primer apellido" name="middle-name" pattern="/^[a-zA-Z]+(?:\s[a-zA-Z]+)*$/" maxlength="30" required>
+                                <div class="invalid-feedback">Por favor ingresa un apellido.</div>
+                            </div>
+
+                            <div class="mb-5">
+                                <label for="username" class="form-label">Nombre de usuario</label>
+                                <input type="text" id="add-username" class="form-control rounded-0" placeholder="Nombre de usuario" name="username" maxlength="30" required>
+                                <div class="invalid-feedback">Por favor ingresa un nombre de usuario.</div>
+                            </div>
+
+                            <div class="mb-5">
+                                <label for="confirm-password" class="form-label">Confirma contraseña</label>
+                                <input type="password" id="add-confirm-password" class="form-control rounded-0" placeholder="Confirma contraseña" name="confirm-password" maxlength="30" required>
+                                <div class="invalid-feedback">
+                                    Debes asegurarte de que las contraseñas coinciden y no estén vacías.
+                                    <ul>
+                                        <li>
+                                            La contraseña debe tener al menos 8 caracteres.
+                                        </li>
+                                        <li>
+                                            Inclusión de letras.
+                                        </li>
+                                        <li>
+                                            Incluir al menos un dígito
+                                        </li>
+                                        <li>
+                                            Incluir al menos un carácter especial
+                                        </li>
+                                        <li>
+                                            No debe ser similar al nombre de usuario o a otros atributos del usuario
+                                        </li>
+                                        <li>
+                                            No debe ser fácil de adivinar
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div class="mb-5">
+                                <label for="supervisor" class="form-label">Supervisor</label>
+                                <select id="supervisor" class="form-select rounded-0" name="supervisor" required>
+                                    <option value="">Selecciona una opción</option>
+                                </select>
+                                <div class="invalid-feedback">Por favor selecciona un supervisor para el usuario operador.</div>
+                            </div>
+
+                        </div>
+
+                        <!-- Dual Listbox - Permisos -->
+                        <div class="col-12 my-5">
+                            <div class="dual-listbox d-flex justify-content-center align-items-start gap-4">
+                                <div class="listbox-container">
+                                    <h5>Permisos disponibles</h5>
+                                    <input type="text" class="form-control mb-2" placeholder="Filtro" id="filterAvailable">
+                                    <select class="form-select listbox" id="availableGroups" multiple size="10">
+                                        <option value="Comentarios">Comentarios</option>
+                                        <option value="Alta">Alta</option>
+                                        <option value="Baja">Baja</option>
+                                        <option value="Guadalajara">Guadalajara</option>
+                                        <option value="León">León</option>
+                                        <option value="Media">Media</option>
+                                        <option value="Otro">Otro</option>
+                                        <option value="Playa del Carmen">Playa del Carmen</option>
+                                        <option value="Querétaro">Querétaro</option>
+                                        <option value="Usuarios">Usuarios</option>
+                                        <option value="Veracruz">Veracruz</option>
+                                    </select>
+                                    <button type="button" class="btn btn-primary w-100 mt-2" id="selectAll">Seleccionar todos</button>
+                                </div>
+
+                                <div class="d-flex flex-column justify-content-center gap-3 mt-4">
+                                    <button type="button" class="btn btn-outline-secondary" id="moveToSelected">➔</button>
+                                    <button type="button" class="btn btn-outline-secondary" id="moveToAvailable">⬅</button>
+                                </div>
+
+                                <div class="listbox-container">
+                                    <h5>Permisos seleccionados</h5>
+                                    <input type="text" class="form-control mb-2" placeholder="Filtro" id="filterSelected">
+                                    <select class="form-select listbox" id="selectedGroups" multiple size="10"></select>
+                                    <button type="button" class="btn btn-danger w-100 mt-2" id="removeAll">Eliminar todos</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Submit button -->
+                    <div class="text-center mb-5">
+                        <button type="button" class="btn btn-primary" id="create-user-button">Guardar Usuario</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

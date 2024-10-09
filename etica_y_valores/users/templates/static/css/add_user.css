@@ -1,0 +1,14 @@
+.dual-listbox {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    align-items: center;
+}
+
+.listbox-container {
+    width: 300px;
+}
+
+.listbox {
+    height: 300px;
+}

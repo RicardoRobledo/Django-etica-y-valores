@@ -7,9 +7,11 @@ from django.conf import settings
 from etica_y_valores.base.models import BaseModel
 from etica_y_valores.enterprises.models import EnterpriseModel
 
+from django.core.files.base import ContentFile
+
 from .custom_fields import UUIDPrimaryKeyField, EncryptedField
 from .custom_validators import validate_custom_email
-from etica_y_valores.base.utils.encrypt_handlers import is_encrypted
+from etica_y_valores.base.utils.encrypt_handlers import is_encrypted, is_file_encrypted, cipher_suite
 
 
 class ChannelCategoryModel(BaseModel):
@@ -184,8 +186,6 @@ class ComplaintModel(BaseModel):
             common_fields = [field.name for field in ComplaintModel._meta.get_fields()
                              if not isinstance(field, EncryptedField) and field.concrete and not field.many_to_many and not field.name == 'id']
 
-            print(encrypted_fields_to_update+common_fields)
-
             super().save(update_fields=encrypted_fields_to_update+common_fields)
 
         else:
@@ -273,21 +273,54 @@ class PhoneModel(BaseModel):
         return f'{self.id}'
 
 
-def unique_file_path(instance, filename):
-
-    ext = filename.split('.')[-1]
-    name = '.'.join(filename.split('.')[:-1])
-    short_uuid = str(uuid.uuid4())[:4]
-    new_filename = f'{name}_{short_uuid}.{ext}'
-
-    return os.path.join('files/', new_filename)
-
-
-class FileModel(BaseModel):
-
-    file = models.FileField(upload_to=unique_file_path)
+class FileModel(models.Model):
+    file = models.FileField(upload_to='encrypted_files/')
     complaint_id = models.ForeignKey(
-        ComplaintModel, on_delete=models.CASCADE, related_name='files')
+        'ComplaintModel', on_delete=models.CASCADE, related_name='files')
+
+    def encrypt_file(self, file):
+        """
+        Encripta el contenido del archivo PDF utilizando Fernet.
+        """
+
+        file.seek(0)
+        file_data = file.read()
+        encrypted_data = cipher_suite.encrypt(file_data)
+
+        return ContentFile(encrypted_data, name=file.name)
+
+    @property
+    def decrypted_file(self):
+        """
+        Desencripta el contenido del archivo PDF y lo devuelve como un archivo.
+        """
+
+        self.file.open()
+        encrypted_data = self.file.read()
+        self.file.close()
+
+        decrypted_data = cipher_suite.decrypt(encrypted_data)
+        return ContentFile(decrypted_data, name=self.file.name)
+
+    def save(self, *args, **kwargs):
+        """
+        Sobrescribe el método save para encriptar el archivo antes de guardarlo.
+        """
+
+        if self.pk:
+
+            if self.is_file_encrypted(self.file):
+
+                fields = [
+                    field.name for field in FileModel._meta.get_fields() if not field.name in ['file', 'id']]
+                super().save(update_fields=fields)
+
+        else:
+
+            encrypted_content = self.encrypt_file(self.file)
+            self.file.save(self.file.name, encrypted_content, save=False)
+
+            super().save(*args, **kwargs)
 
     def __repr__(self):
         return f'File(file={self.file}, complaint_id={self.complaint_id})'

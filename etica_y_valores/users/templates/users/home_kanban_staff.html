@@ -8,7 +8,7 @@
 
 {% block content %}
 
-{% include 'users/snippets/modal_snippet.html' %}
+{% include 'users/snippets/modal_update_complaint_snippet.html' %}
 
 <link rel="stylesheet" href="{% static 'css/home_kanban_staff.css' %}">
 
@@ -96,7 +96,7 @@
                         <p>Prioridad: {{ complaint.priority_id.priority }}</p>
                         <p>Responsable: {{ complaint.user_id.first_name }}</p>
                         <p>Fecha: {{ complaint.created_at|date:"d/m/Y" }}</p>
-                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalComplaint" onclick="modificarDenuncia('{{ complaint.id }}')">Modificar</button>
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalComplaint" onclick="complaintDetail('{{ complaint.id }}')">Modificar</button>
                         <button class="btn btn-success" onclick="closeComplaint('{{ complaint.id }}')">Cerrar</button>
                         {% if user.user_level_id.user_level == 'Superusuario' %}
                             <button class="btn btn-danger" onclick="notProceedComplaint('{{ complaint.id }}')" data-bs-toggle="modal" data-bs-target="#notProceedComplaintModal">No proceder</button>
@@ -118,7 +118,7 @@
                         <p>Prioridad: {{ complaint.priority_id.priority }}</p>
                         <p>Responsable: {{ complaint.user_id.first_name }}</p>
                         <p>Fecha: {{ complaint.created_at|date:"d/m/Y" }}</p>
-                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalComplaint" onclick="modificarDenuncia('{{ complaint.id }}')">Modificar</button>
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalComplaint" onclick="complaintDetail('{{ complaint.id }}')">Modificar</button>
                         <button class="btn btn-success" onclick="closeComplaint('{{ complaint.id }}')">Cerrar</button>
                         {% if user.user_level_id.user_level == 'Superusuario' %}
                             <button class="btn btn-danger" onclick="notProceedComplaint('{{ complaint.id }}')" data-bs-toggle="modal" data-bs-target="#notProceedComplaintModal">No proceder</button>
@@ -140,7 +140,7 @@
                         <p>Prioridad: {{ complaint.priority_id.priority }}</p>
                         <p>Responsable: {{ complaint.user_id.first_name }}</p>
                         <p>Fecha: {{ complaint.created_at|date:"d/m/Y" }}</p>
-                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalComplaint" onclick="modificarDenuncia('{{ complaint.id }}')">Modificar</button>
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalComplaint" onclick="complaintDetail('{{ complaint.id }}')">Modificar</button>
                         <button class="btn btn-success" onclick="closeComplaint('{{ complaint.id }}')">Cerrar</button>
                         {% if user.user_level_id.user_level == 'Superusuario' %}
                             <button class="btn btn-danger" onclick="notProceedComplaint('{{ complaint.id }}')" data-bs-toggle="modal" data-bs-target="#notProceedComplaintModal">No proceder</button>
@@ -162,7 +162,7 @@
                         <p>Prioridad: {{ complaint.priority_id.priority }}</p>
                         <p>Responsable: {{ complaint.user_id.first_name }}</p>
                         <p>Fecha: {{ complaint.created_at|date:"d/m/Y" }}</p>
-                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalComplaint" onclick="modificarDenuncia('{{ complaint.id }}')">Modificar</button>
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalComplaint" onclick="complaintDetail('{{ complaint.id }}')">Modificar</button>
                         <button class="btn btn-success" onclick="closeComplaint('{{ complaint.id }}')">Cerrar</button>
                         {% if user.user_level_id.user_level == 'Superusuario' %}
                             <button class="btn btn-danger" onclick="notProceedComplaint('{{ complaint.id }}')" data-bs-toggle="modal" data-bs-target="#notProceedComplaintModal">No proceder</button>

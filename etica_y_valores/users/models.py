@@ -105,5 +105,6 @@ class UserModel(AbstractBaseUser, PermissionsMixin, BaseModel):
                 f'is_active={self.is_active}, '
                 f'user_level_id={self.user_level_id}, '
                 f'enterprise_id={self.enterprise_id}, '
+                f'supervisor={self.supervisor}, '
                 f'created_at={self.created_at}, '
                 f'updated_at={self.updated_at})')
