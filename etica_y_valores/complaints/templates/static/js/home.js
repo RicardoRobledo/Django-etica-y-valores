@@ -10,8 +10,8 @@ let phonesQuantity = 0;
 let emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.(com|org|net|edu|gov|mil|int)$/;
 let phonePattern = /^[0-9]{10}$/;
 
-//const base_url = 'https://django-etica-y-valores.onrender.com';
-const base_url = 'http://127.0.0.1:8000';
+const base_url = 'https://django-etica-y-valores.onrender.com';
+//const base_url = 'http://127.0.0.1:8000';
 const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
 
