@@ -1,0 +1,73 @@
+{% extends "users/base.html" %}
+
+{% load static %}
+
+{% block title %}
+  Denuncias
+{% endblock %}
+
+{% block content %}
+
+{% include 'users/snippets/modal_update_complaint_snippet.html' %}
+
+<link rel="stylesheet" href="{% static 'css/interactive_kanban.css' %}">
+
+<div class="container my-4">
+    <div class="header">
+        <h1>Kanban Interactivo</h1>
+        <div class="filters">
+            <button class="btn btn-primary" onclick="cargarDenuncias('todas')">Todas las Denuncias</button>
+            <button class="btn btn-primary" onclick="cargarDenuncias('pendientes')">Pendientes</button>
+        </div>
+    </div>
+
+    <!-- Paginación -->
+    <nav aria-label="Page navigation" class="my-4">
+      <ul class="pagination justify-content-center" id="pagination"></ul>
+    </nav>
+
+    <select id="main-option-select">
+      <option value="priority" selected>Prioridad</option>
+      <option value="classification">Clasificación</option>
+      <option value="status">Estatus</option>
+    </select>
+
+    <select id="sub-option-select">
+      <option value="priority">Prioridad</option>
+      <option value="classification" selected>Clasificación</option>
+      <option value="status">Estatus</option>
+    </select>
+
+    <div class="loader-wrapper m-5" id="interactive-kanban-loader">
+      <div class="loader"></div>
+      <p class="mt-4">Espera un momento...</p>
+    </div>
+
+    <div class="kanban-board mt-2">
+      <div id="kanban-message">No puedes incluir la misma opción en filas y columnas</div>
+      <div id="kanban-container"></div>
+    </div>
+
+    <div class="modal fade" id="notProceedComplaintModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h1 class="modal-title fs-5" id="notProceedComplaintModalTitle">No proceder con esta denuncia</h1>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body m-3">
+                ¿Seguro que no quiere proceder con esta denuncia?
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-danger" id="notProceedComplaintButtonModal">No proceder</button>
+            </div>
+          </div>
+        </div>
+    </div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dragula/3.7.3/dragula.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
+<script src="{% static 'js/interactive_kanban.js' %}"></script>
+{% endblock %}

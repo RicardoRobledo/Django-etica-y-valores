@@ -31,6 +31,8 @@ urlpatterns = [
          name='user_info_staff'),
     path('staff/complaints/',
          user_views.HomeKanbanStaffView.as_view(), name='home_staff'),
+    path('staff/complaints/interactive-kanban/',
+         user_views.InteractiveKanbanComplaintView.as_view(), name='interactive_kanban_staff'),
     path('staff/complaints/status/<str:status>/',
          user_views.StatusKanbanStaffView.as_view(), name='status_staff'),
     path('staff/complaints/city/<str:city>/',

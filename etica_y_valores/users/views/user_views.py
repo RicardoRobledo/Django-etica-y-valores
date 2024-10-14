@@ -114,7 +114,7 @@ class HomeKanbanStaffView(LoginRequiredMixin, ListView):
     model = ComplaintModel
     template_name = 'users/home_kanban_staff.html'
     context_object_name = 'complaints'  # Nombre del contexto para la lista de quejas
-    paginate_by = 10  # Si quieres paginación, puedes ajustarlo o quitarlo
+    paginate_by = 10 # Si quieres paginación, puedes ajustarlo o quitarlo
 
     def get_queryset(self):
         """
@@ -558,7 +558,17 @@ class AddUserView(LoginRequiredMixin, View):
         This method return users in the enterprise.
         """
 
-        print(request.POST)
+        return render(request, self.template_name)
+
+
+class InteractiveKanbanComplaintView(LoginRequiredMixin, View):
+
+    template_name = 'users/interactive_kanban.html'
+
+    def get(self, request, *args, **kwargs):
+        """
+        This method return our interactive kanban view
+        """
 
         return render(request, self.template_name)
 

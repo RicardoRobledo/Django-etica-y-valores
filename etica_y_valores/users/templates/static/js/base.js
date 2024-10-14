@@ -12,7 +12,7 @@ async function getComplaintsByMenuOption(path, status){
 
 $('#menu-button').on('click', async function () {
 
-    $('.loader-wrapper').show();
+    $('#menu-loader').show();
     $('.list-container').hide();
     
     const id = $('#user-id').text();
@@ -197,7 +197,7 @@ $('#menu-button').on('click', async function () {
 
     $('.list-container').html(sideBarListContainer+`</ul>`);
 
-    $('.loader-wrapper').hide();
+    $('#menu-loader').hide();
     $('.list-container').show();
 
 });

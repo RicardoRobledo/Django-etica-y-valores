@@ -1,3 +1,4 @@
+from django.views.decorators.csrf import csrf_exempt
 import json
 
 from datetime import datetime
@@ -9,7 +10,9 @@ from django.views import View
 from django.shortcuts import render
 from django.http import JsonResponse
 from django.core.exceptions import ValidationError
-from django.db.models import Count, F
+from django.core.paginator import Paginator
+from django.db.models import Count, F, Value
+from django.db.models.functions import Coalesce
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods
@@ -360,10 +363,110 @@ def complaints_count(request):
             'priority_staff_path': priority_staff_path,
             'classification_staff_path': classification_staff_path,
             'channel_staff_path': channel_staff_path,
-            'list_user_staff_path': reverse('app_users:list_user_staff') if 'Usuario' in user_permissions['tasks'] else ''
+            'list_user_staff_path': reverse('app_users:list_user_staff') if 'Usuarios' in user_permissions['tasks'] else ''
         }, status=HTTPStatus.OK)
 
     return response
+
+
+@require_GET
+@login_required
+def get_classification_types(request):
+    """
+    This function returns the classification types
+    """
+
+    return JsonResponse(data={
+        'classification_types': list(ClassificationCategoryModel.objects.values('id', 'classification'))
+    }, status=HTTPStatus.OK)
+
+
+@require_GET
+@login_required
+def get_priority_types(request):
+    """
+    This function returns the priority types
+    """
+
+    user = request.user
+    user_level = user.user_level_id.user_level
+
+    if user_level == 'Superusuario' or user_level == 'Supervisor':
+
+        return JsonResponse(data={
+            'priority_types': list(PriorityCategoryModel.objects.values('id', 'priority'))
+        }, status=HTTPStatus.OK)
+
+    else:
+
+        user_permissions = get_grouped_user_permissions(user, user_level)
+
+        return JsonResponse(data={
+            'priority_types': list(PriorityCategoryModel.objects.filter(
+                priority__in=user_permissions['priorities']).values('id', 'priority'))
+        }, status=HTTPStatus.OK)
+
+
+@require_GET
+@login_required
+def get_status_types(request):
+    """
+    This function returns the status types
+    """
+
+    user = request.user
+    user_level = user.user_level_id.user_level
+
+    if user_level == 'Superusuario' or user_level == 'Supervisor':
+
+        return JsonResponse(data={
+            'status_types': list(StatusCategoryModel.objects.values('id', 'status'))
+        }, status=HTTPStatus.OK)
+
+    else:
+
+        user_permissions = get_grouped_user_permissions(user, user_level)
+
+        return JsonResponse(data={
+            'status_types': list(StatusCategoryModel.objects.filter(
+                status__in=user_permissions['statuses']).values('id', 'status'))
+        }, status=HTTPStatus.OK)
+
+
+@require_GET
+@login_required
+def complaints_paginator(request):
+    """
+    This function returns the complaints by page
+    """
+
+    complaints = ComplaintModel.objects.all()
+    page_number = request.GET.get('page', 1)
+
+    # Pagination
+    paginator = Paginator(complaints, 2)
+    page_obj = paginator.get_page(page_number)
+
+    complaints_paginated = list(page_obj.object_list.annotate(
+        city=F('city_id__city'),
+        priority=F('priority_id__priority'),
+        status=F('status_id__status'),
+        classification=F('classification_id__classification'),
+        first_name=Coalesce(F('user_id__first_name'), Value(''))
+    ).values('id', 'city', 'priority', 'status', 'classification', 'first_name', 'created_at'))
+
+    pagination_data = {
+        'current_page': page_obj.number,
+        'has_previous': page_obj.has_previous(),
+        'has_next': page_obj.has_next(),
+        'previous_page_number': page_obj.previous_page_number() if page_obj.has_previous() else None,
+        'next_page_number': page_obj.next_page_number() if page_obj.has_next() else None,
+        'total_pages': paginator.num_pages,
+        'first_page': 1,
+        'last_page': paginator.num_pages
+    }
+
+    return JsonResponse({'complaints': complaints_paginated, 'pagination': pagination_data}, status=HTTPStatus.OK)
 
 
 @require_http_methods(["POST"])
@@ -455,6 +558,7 @@ def create_complaint(request):
         relation_id=relation,
         city_id=city,
         channel_id=channel,
+        priority_id=PriorityCategoryModel.objects.get(priority='Sin asignar'),
         status_id=StatusCategoryModel.objects.get(
             status='Pendiente de Asignar'),
         enterprise_id=EnterpriseModel.objects.get(subdomain=request.get_host())
@@ -684,6 +788,69 @@ def update_complaint_priority(request, code):
     )
 
     return JsonResponse({'msg': 'complaint status updated'}, status=HTTPStatus.OK)
+
+
+@require_http_methods(["PUT"])
+# @login_required
+@csrf_exempt
+def update_dynamic_complaint(request, code):
+    """
+    This view updates the complaint given 2 values
+    """
+
+    try:
+        data = json.loads(request.body)
+
+        first_param = data.get('first_param', '')
+        second_param = data.get('second_param', '')
+
+        if not first_param or not second_param:
+            return JsonResponse({"msg": "Empty required fields"}, status=HTTPStatus.BAD_REQUEST)
+
+        if not 'field' in first_param or not 'value' in first_param or not 'field' in second_param or not 'value' in second_param:
+            return JsonResponse({"msg": "Invalid JSON format"}, status=HTTPStatus.BAD_REQUEST)
+
+    except json.JSONDecodeError:
+        return JsonResponse({"msg": "Invalid JSON format"}, status=HTTPStatus.BAD_REQUEST)
+
+    available_related_fields_to_update = {
+        'classification': ClassificationCategoryModel,
+        'priority': PriorityCategoryModel,
+        'status': StatusCategoryModel,
+    }
+
+    if first_param['field'] not in available_related_fields_to_update or second_param['field'] not in available_related_fields_to_update:
+        return JsonResponse({"msg": "Invalid field to update"}, status=HTTPStatus.BAD_REQUEST)
+
+    first_model = available_related_fields_to_update[first_param['field']]
+    second_model = available_related_fields_to_update[second_param['field']]
+
+    try:
+        first_model._meta.get_field(first_param['field'])
+        second_model._meta.get_field(second_param['field'])
+    except:
+        return JsonResponse({"msg": "Nonexistent fields"}, status=HTTPStatus.BAD_REQUEST)
+
+    first_instance = first_model.objects.filter(
+        **{first_param['field']: first_param['value']})
+    second_instance = second_model.objects.filter(
+        **{second_param['field']: second_param['value']})
+
+    if not first_instance.exists() or not second_instance.exists():
+        return JsonResponse({"msg": "Instances for params not found"}, status=HTTPStatus.NOT_FOUND)
+
+    first_instance = first_instance.first()
+    second_instance = second_instance.first()
+
+    complaint = ComplaintModel.objects.filter(id=code)
+
+    if not complaint.exists():
+        return JsonResponse({"msg": "Complaint not found"}, status=HTTPStatus.NOT_FOUND)
+
+    complaint.update(**{f"{first_param['field']}_id": first_instance,
+                     f"{second_param['field']}_id": second_instance})
+
+    return JsonResponse(data={"msg": "Complaint updated successfully"}, status=HTTPStatus.OK)
 
 
 class ComplaintCreatedView(View):
