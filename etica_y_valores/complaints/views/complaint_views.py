@@ -143,6 +143,8 @@ def complaints_count(request):
         'app_users:classification_staff', args=['placeholder'])
     channel_staff_path = reverse(
         'app_users:channel_staff', args=['placeholder'])
+    interactive_kanban_staff_path = reverse(
+        'app_users:interactive_kanban_staff')
 
     if user_level == 'Superusuario':
 
@@ -213,7 +215,8 @@ def complaints_count(request):
             'priority_staff_path': priority_staff_path,
             'classification_staff_path': classification_staff_path,
             'channel_staff_path': channel_staff_path,
-            'list_user_staff_path': reverse('app_users:list_user_staff')
+            'list_user_staff_path': reverse('app_users:list_user_staff'),
+            'interactive_kanban_staff_path': interactive_kanban_staff_path
         }, status=HTTPStatus.OK)
 
     elif user_level == 'Supervisor':
@@ -285,7 +288,8 @@ def complaints_count(request):
             'priority_staff_path': priority_staff_path,
             'classification_staff_path': classification_staff_path,
             'channel_staff_path': channel_staff_path,
-            'list_user_staff_path': reverse('app_users:list_user_staff')
+            'list_user_staff_path': reverse('app_users:list_user_staff'),
+            'interactive_kanban_staff_path': interactive_kanban_staff_path
         }, status=HTTPStatus.OK)
 
     else:
@@ -363,7 +367,8 @@ def complaints_count(request):
             'priority_staff_path': priority_staff_path,
             'classification_staff_path': classification_staff_path,
             'channel_staff_path': channel_staff_path,
-            'list_user_staff_path': reverse('app_users:list_user_staff') if 'Usuarios' in user_permissions['tasks'] else ''
+            'list_user_staff_path': reverse('app_users:list_user_staff') if 'Usuarios' in user_permissions['tasks'] else '',
+            'interactive_kanban_staff_path': interactive_kanban_staff_path
         }, status=HTTPStatus.OK)
 
     return response

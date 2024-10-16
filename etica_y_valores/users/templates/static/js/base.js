@@ -55,15 +55,9 @@ $('#menu-button').on('click', async function () {
                         </a>
                       </li>
                       <li class="nav-item p-2 custom-hover">
-                        <a class="nav-link" role="button">
+                        <a class="nav-link" role="button" href="{{interactive_kanban_staff_path}}">
                             <i class="bi bi-file-earmark-text-fill"></i>
-                            Estatus vs Clasificación de denuncia abiertas
-                        </a>
-                      </li>
-                      <li class="nav-item p-2 custom-hover">
-                        <a class="nav-link" role="button">
-                            <i class="bi bi-file-earmark-text-fill"></i>
-                            Prioridad vs Estatus abiertas
+                            Denuncias en cuadrícula
                         </a>
                       </li>
 
@@ -170,6 +164,8 @@ $('#menu-button').on('click', async function () {
         '{{home_staff_path}}', responseComplaintCount['home_staff_path']
     ).replace(
         '{{table_complaints_ended_staff_path}}', responseComplaintCount['table_complaints_ended_staff_path']
+    ).replace(
+        '{{interactive_kanban_staff_path}}', responseComplaintCount['interactive_kanban_staff_path']
     ).replace(
         '{{all_complaints_closed_count}}', all_complaints_closed_count
     ).replace(
