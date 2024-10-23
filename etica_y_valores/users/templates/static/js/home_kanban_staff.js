@@ -1,5 +1,5 @@
-const base_url = 'https://django-etica-y-valores.onrender.com';
-//const base_url = 'http://127.0.0.1:8000';
+//const base_url = 'https://django-etica-y-valores.onrender.com';
+const base_url = 'http://127.0.0.1:8000';
 
 const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 

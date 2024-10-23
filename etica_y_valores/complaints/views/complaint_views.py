@@ -445,7 +445,41 @@ def complaints_paginator(request):
     This function returns the complaints by page
     """
 
-    complaints = ComplaintModel.objects.all()
+    # user
+    user = request.user
+
+    # user level
+    user_level = user.user_level_id.user_level
+
+    if user_level == 'Superusuario' or user_level == 'Supervisor':
+        complaints = ComplaintModel.objects.filter(
+            enterprise_id__subdomain=request.get_host())
+    else:
+        user_permissions = get_grouped_user_permissions(user, user_level)
+        complaints = ComplaintModel.objects.filter(
+            enterprise_id__subdomain=request.get_host(),
+            user_id__id=user.id,
+            city_id__city__in=user_permissions['cities'],
+            priority_id__priority__in=user_permissions['priorities'],)
+
+    complaints = complaints.exclude(
+        status_id__status__in=['Desestimados', 'Resolución'])
+
+    pagination_data = {
+        'current_page': '',
+        'has_previous': '',
+        'has_next': '',
+        'previous_page_number': '',
+        'next_page_number': '',
+        'total_pages': '',
+        'first_page': '',
+        'last_page': ''
+    }
+    complaints_paginated = []
+
+    if not complaints.exists():
+        return JsonResponse({'complaints': complaints_paginated, 'pagination': pagination_data}, status=HTTPStatus.OK)
+
     page_number = request.GET.get('page', 1)
 
     # Pagination
@@ -460,16 +494,16 @@ def complaints_paginator(request):
         first_name=Coalesce(F('user_id__first_name'), Value(''))
     ).values('id', 'city', 'priority', 'status', 'classification', 'first_name', 'created_at'))
 
-    pagination_data = {
-        'current_page': page_obj.number,
-        'has_previous': page_obj.has_previous(),
-        'has_next': page_obj.has_next(),
-        'previous_page_number': page_obj.previous_page_number() if page_obj.has_previous() else None,
-        'next_page_number': page_obj.next_page_number() if page_obj.has_next() else None,
-        'total_pages': paginator.num_pages,
-        'first_page': 1,
-        'last_page': paginator.num_pages
-    }
+    pagination_data['current_page'] = page_obj.number
+    pagination_data['has_previous'] = page_obj.has_previous()
+    pagination_data['has_next'] = page_obj.has_next()
+    pagination_data['previous_page_number'] = page_obj.previous_page_number(
+    ) if page_obj.has_previous() else None
+    pagination_data['next_page_number'] = page_obj.next_page_number(
+    ) if page_obj.has_next() else None
+    pagination_data['total_pages'] = paginator.num_pages
+    pagination_data['first_page'] = 1
+    pagination_data['last_page'] = paginator.num_pages
 
     return JsonResponse({'complaints': complaints_paginated, 'pagination': pagination_data}, status=HTTPStatus.OK)
 
